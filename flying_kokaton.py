@@ -114,6 +114,9 @@ def main():
             case "home:0":
                 status = "home:1"
             case "home:1":
+                if pg.key.get_pressed()[pg.K_LALT]:
+                        status = "game:0"
+                        continue
                 for event in pg.event.get():
                     screen.blit(start_img, start_rct)
                     # キーダウンかつ、全角のテキスト編集中でない
@@ -123,8 +126,8 @@ def main():
                     # 入力の確定
                         if event.unicode in ("\r", "") and event.key == K_RETURN:
                             print(input_text)  # 確定した文字列を表示
-                            draw_text(format(text, screen))  # テキストボックスに"|"を表示
-                            input_text = format(text, screen)  # "|"に戻す
+                            draw_text(text, screen)  # テキストボックスに"|"を表示
+                            input_text = text, screen  # "|"に戻す
                             break
                     elif event.type == TEXTEDITING:  # 全角入力
                         input_text = text.edit(event.text, event.start)
@@ -135,13 +138,10 @@ def main():
                         draw_text(input_text, screen)
                     font1 = pygame.font.SysFont("yumincho", 50)
                     text1 = font1.render("名前を入力", True, (0, 255, 0))
-                    screen.blit(text1, (40, 30))
+                    screen.blit(text1, (100, 130))
                     text = Text()  # テキスト処理のロジックTextクラスをインスタンス化
                     pygame.key.start_text_input()  # input, editingイベントをキャッチするようにする
                     draw_text(text, screen)
-                    if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
-                        status = "game:0"
-                        break
             case "game:0":                                 
                 for event in pg.event.get():
                     if event.type == pg.QUIT: return
