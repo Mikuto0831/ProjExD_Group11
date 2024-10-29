@@ -86,7 +86,13 @@ def main():
             case "game:0":                                 
                 for event in pg.event.get():
                     if event.type == pg.QUIT: return
-
+                    elif event.type == pg.MOUSEBUTTONDOWN:
+                        
+                    elif event.type == pg.MOUSEMOTION:
+                        
+                    elif event.type == pg.MOUSEBUTTONUP:
+                        
+                        
                 key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
                 
                 # 練習8-4 方向キーの押下状態を繁栄
