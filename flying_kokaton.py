@@ -6,10 +6,17 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 定数宣言部
 
-
 # 関数宣言部
-
-
+def elise(ball_lst: list,judge: list)-> list:
+    """
+    引数:ball_lst　ボールの色やなしを保持するリスト
+    引数:judge判定された
+    コンボ判定されたball_lstを0にする
+    judge =[[0,1],[0,2]]etc
+    """
+    for i in judge:
+        ball_lst[i[0]][i[1]] =0
+    return ball_lst
 # クラス宣言部
 
 def main():
