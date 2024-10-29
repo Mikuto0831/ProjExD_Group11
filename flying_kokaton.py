@@ -35,7 +35,7 @@ class PuzzleList():
 
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((HEIGHT, WIDTH))
+    screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
