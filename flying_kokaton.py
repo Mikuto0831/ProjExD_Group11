@@ -149,6 +149,7 @@ class Combo:
             elif combo_type == 2:
                 for n in range(combo_len):
                     lis[i+n][j] = 0
+        self.combo_lis.clear()
         return lis
 
 
@@ -165,7 +166,12 @@ def drop_down(lis:list[list])->list[list]:
                 if lis[i][j] == 0:
                     lis[i][j] = lis[i-1][j]
                     lis[i-1][j] = 0
-        if all(lis):
+        
+        jadge = [0 for n in range(6)]
+        for i in range(6):
+            if all(lis[i]):
+                jadge[i] = 1
+        if all(jadge):
             check = False
     return lis
 
@@ -178,6 +184,21 @@ lis = [[1, 1, 1, 2, 4, 2],
        [4, 4, 2, 5, 4, 5], 
        [3, 1, 3, 4, 4, 5], 
        [3, 3, 3, 2, 4, 1]]
+count = 0
+while True:
+    check = Combo(lis)
+    co = check.get_count()
+    lis = check.elise(lis)
+    print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
+    print()
+    lis = drop_down(lis)
+    print()
+    print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
+    count += 1
+    print("count", count, "co", co)
+    if co == 0:
+        break
+
 # # main関数
 # def main():
 #     pg.display.set_caption("はばたけ！こうかとん")
