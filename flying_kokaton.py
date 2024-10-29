@@ -59,7 +59,7 @@ class Score:
         pass
 
       
-class PuzzleList
+class PuzzleList:
     """
     パズル画面を管理するリストに関係するクラス
     担当:瀬尾
@@ -135,7 +135,6 @@ class Combo:
                     stack += combo_len-1
                     print("i", [i, j], combo_len)
 
-    
     def get_count(self):
         return self.combo_count
     
@@ -155,85 +154,107 @@ class Combo:
 
 
 # 関数宣言部
+def drop_down(lis:list[list])->list[list]:
+    check = True
+    while check:
+        for j in range(6):
+            if lis[0][j] == 0:
+                lis[0][j] = ran(1, 5)
+        for i in range(1, 6):
+            for j in range(6):
+                if lis[i][j] == 0:
+                    lis[i][j] = lis[i-1][j]
+                    lis[i-1][j] = 0
+        if all(lis):
+            check = False
+    return lis
 
 
-# main関数
-def main():
-    pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((WIDTH, HEIGHT))
-    clock  = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg.jpg")
-    bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
-    # ここから 練習2
-    kk_img = pg.image.load("fig/3.png")
-    kk_img = pg.transform.flip(kk_img, True, False)
-    # ここから 練習8-1 rectの初期座標設定
-    kk_rct = kk_img.get_rect()
-    kk_rct.center = 300,200
-    # ここまで
 
-    score = Score()
 
-    tmr = 0 # 時間保存
+lis = [[1, 1, 1, 2, 4, 2], 
+       [2, 2, 2, 3, 4, 4], 
+       [3, 2, 1, 2, 4, 5], 
+       [4, 4, 2, 5, 4, 5], 
+       [3, 1, 3, 4, 4, 5], 
+       [3, 3, 3, 2, 4, 1]]
+# # main関数
+# def main():
+#     pg.display.set_caption("はばたけ！こうかとん")
+#     screen = pg.display.set_mode((WIDTH, HEIGHT))
+#     clock  = pg.time.Clock()
+#     bg_img = pg.image.load("fig/pg_bg.jpg")
+#     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
+#     # ここから 練習2
+#     kk_img = pg.image.load("fig/3.png")
+#     kk_img = pg.transform.flip(kk_img, True, False)
+#     # ここから 練習8-1 rectの初期座標設定
+#     kk_rct = kk_img.get_rect()
+#     kk_rct.center = 300,200
+#     # ここまで
 
-    """
-    status変数について
-    本変数では画面・実行機能を選択する値を管理します。
-    次の状態を代入してあげるだけで簡単に遷移を実現できます
-    以下の範囲に基づいて使用してください
+#     score = Score()
 
-    {機能名}:{状態番号}
+#     tmr = 0 # 時間保存
 
-    例
-    ホーム画面に関する機能
-    status = "home:0"
-    """
-    status:str = "home:0"
-    # ここまで
+#     """
+#     status変数について
+#     本変数では画面・実行機能を選択する値を管理します。
+#     次の状態を代入してあげるだけで簡単に遷移を実現できます
+#     以下の範囲に基づいて使用してください
 
-    while True:
-        # 共通処理部
+#     {機能名}:{状態番号}
 
-        # 各statusに基づく処理部
-        match status:
-            case "home:0":
-                for event in pg.event.get():
-                    # キーが押されたらゲーム画面へ
-                    if event.type == pg.KEYDOWN:
-                        status = "game:0"
-                        break
-            case "game:0":                                 
-                for event in pg.event.get():
-                    if event.type == pg.QUIT: return
+#     例
+#     ホーム画面に関する機能
+#     status = "home:0"
+#     """
+#     status:str = "home:0"
+#     # ここまで
 
-                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+#     while True:
+#         # 共通処理部
+
+#         # 各statusに基づく処理部
+#         match status:
+#             case "home:0":
+#                 for event in pg.event.get():
+#                     # キーが押されたらゲーム画面へ
+#                     if event.type == pg.KEYDOWN:
+#                         status = "game:0"
+#                         break
+#             case "game:0":                                 
+#                 for event in pg.event.get():
+#                     if event.type == pg.QUIT: return
+
+#                 key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
                 
-                # 練習8-4 方向キーの押下状態を繁栄
-                kk_rct_tmp = (
-                    key_lst[pg.K_RIGHT] * 2 + key_lst[pg.K_LEFT] * (-1) - 1,
-                    key_lst[pg.K_UP] * (-1) + key_lst[pg.K_DOWN] * 1
-                    )
-                kk_rct.move_ip(kk_rct_tmp)
+#                 # 練習8-4 方向キーの押下状態を繁栄
+#                 kk_rct_tmp = (
+#                     key_lst[pg.K_RIGHT] * 2 + key_lst[pg.K_LEFT] * (-1) - 1,
+#                     key_lst[pg.K_UP] * (-1) + key_lst[pg.K_DOWN] * 1
+#                     )
+#                 kk_rct.move_ip(kk_rct_tmp)
                 
 
 
-                # 練習7
-                for i in range(4):
-                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
+#                 # 練習7
+#                 for i in range(4):
+#                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                 
-                screen.blit(kk_img, kk_rct)
+#                 screen.blit(kk_img, kk_rct)
 
-                score.update(screen)
+#                 score.update(screen)
 
-        # 共通処理部
+#         # 共通処理部
         
-        pg.display.update()
-        tmr += 1        
-        clock.tick(200)
+#         pg.display.update()
+#         tmr += 1        
+#         clock.tick(200)
 
 
-if __name__ == "__main__":
-    pg.init()
-    main()
-    pg.quit()
-    sys.exit()
+# if __name__ == "__main__":
+#     pg.init()
+#     main()
+#     pg.quit()
+#     sys.exit()
