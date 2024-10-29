@@ -8,6 +8,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # 定数宣言部
 HEIGHT = 650
 WIDTH = 450
+RAD =15#こうかとんボールの半径
 
 # 関数宣言部
 def elise(ball_lst: list,judge: list)-> list:
@@ -22,6 +23,37 @@ def elise(ball_lst: list,judge: list)-> list:
     return ball_lst
 # クラス宣言部
 
+class Koukaton(pg.sprite.Sprite):
+    """
+    こうかとんに関するクラス
+    """
+    color=(
+        None,
+        (255,0,0),#赤
+        (0,0,255),#青
+        (0,255,0),#緑
+        (255,255,0),#黄
+        (136,72,152)#紫
+    )
+    def __init__(self,ball_list: list[list],num: tuple):
+        super().__init__()
+        print(ball_list)
+        #self.image = pg.Surface([WIDTH,HEIGHT])
+        self.image = pg.Surface((2*RAD, 2*RAD))
+        self.i=num[0]
+        self.j=num[1]
+        self.col =__class__.color[ball_list[self.i][self.j]]
+        self.image.set_alpha(128)
+        self.image.set_colorkey((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.center = self.i*70,self.j*50
+                
+
+    
+    def update(self,screen:pg.surface,bb_img:pg.image):
+        screen.set_alpha(128)
+        pg.draw.circle(screen, self.col, (self.rect.centerx+RAD,self.rect.centery+RAD), RAD)
+        screen.blit(bb_img, [self.rect.centerx, self.rect.centery])
 
 
 
@@ -47,16 +79,18 @@ def main():
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
-    # ここから 練習2
+    #ここから 練習2
     kk_img = pg.image.load("fig/3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
-    # ここから 練習8-1 rectの初期座標設定
+    #ここから 練習8-1 rectの初期座標設定
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300,200
-    # ここまで
+    #ここまで
 
     tmr = 0 # 時間保存
 
+    ball = pg.sprite.Group()
+    lis= PuzzleList()
     """
     status変数について
     本変数では画面・実行機能を選択する値を管理します。
@@ -74,41 +108,38 @@ def main():
 
     while True:
         # 共通処理部
+        event_list = pg.event.get()
 
         # 各statusに基づく処理部
         match status:
             case "home:0":
-                for event in pg.event.get():
+                for event in event_list:
+                    if event.type == pg.QUIT: return
                     # キーが押されたらゲーム画面へ
                     if event.type == pg.KEYDOWN:
                         status = "game:0"
                         break
-            case "game:0":                                 
-                for event in pg.event.get():
-                    if event.type == pg.QUIT: return
+            
+            case "game:0":
+                """
+                ゲームの初期化
+                """
+                t = lis.get_lis()
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(Koukaton(lis.get_lis(),(i,j)))
+                status="game:1"
 
-                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+            case "game:1":  
+                ball.update(screen,kk_img)                               
+                ball.draw(screen)
                 
-                # 練習8-4 方向キーの押下状態を繁栄
-                kk_rct_tmp = (
-                    key_lst[pg.K_RIGHT] * 2 + key_lst[pg.K_LEFT] * (-1) - 1,
-                    key_lst[pg.K_UP] * (-1) + key_lst[pg.K_DOWN] * 1
-                    )
-                kk_rct.move_ip(kk_rct_tmp)
-                
-
-
-                # 練習7
-                for i in range(4):
-                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
-                
-                screen.blit(kk_img, kk_rct)
 
         # 共通処理部
-        
         pg.display.update()
         tmr += 1        
         clock.tick(200)
+        print(status)
 
 
 if __name__ == "__main__":
