@@ -1,4 +1,5 @@
 import os
+from random import randint as ran
 import sys
 import uuid
 import pygame as pg
@@ -6,10 +7,8 @@ import pygame as pg
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 定数宣言部
-
-
-# 関数宣言部
-
+HEIGHT = 650
+WIDTH = 450
 
 # クラス宣言部
 class Score:
@@ -57,21 +56,46 @@ class Score:
         # TODO: クラス削除時にスコアをファイルに保存する
         pass
 
+class PuzzleList():
+    """
+    パズル画面を管理するリストに関係するクラス
+    """
 
+    def __init__(self):
+        """
+        """
+        self.lis = [[ran(1,5) for d in range(6)] for n in range(6)]
+    
+    def get_lis(self):
+        return self.lis
+
+
+# 関数宣言部
+def elise(ball_lst: list,judge: list)-> list:
+    """
+    引数:ball_lst　ボールの色やなしを保持するリスト
+    引数:judge判定された
+    コンボ判定されたball_lstを0にする
+    judge =[[0,1],[0,2]]etc
+    """
+    for i in judge:
+        ball_lst[i[0]][i[1]] =0
+    return ball_lst
+
+# main関数
 def main():
-
-    # init ここから
     pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((800, 600))
+    screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
-    
+    # ここから 練習2
     kk_img = pg.image.load("fig/3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
-    
+    # ここから 練習8-1 rectの初期座標設定
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300,200
+    # ここまで
 
     score = Score()
 
