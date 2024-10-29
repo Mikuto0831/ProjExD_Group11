@@ -6,8 +6,8 @@ import pygame as pg
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 定数宣言部
-Height = 650
-Width = 450
+HEIGHT = 650
+WIDTH = 450
 
 # 関数宣言部
 
@@ -35,7 +35,7 @@ class PuzzleList():
 
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((Height, Width))
+    screen = pg.display.set_mode((HEIGHT, WIDTH))
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
