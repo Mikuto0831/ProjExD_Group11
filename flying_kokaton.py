@@ -1,6 +1,7 @@
 import os
 from random import randint as ran
 import sys
+import time
 import pygame as pg
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -8,7 +9,9 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # 定数宣言部
 HEIGHT = 650
 WIDTH = 450
-RAD =15#こうかとんボールの半径
+RAD =25#こうかとんボールの半径
+BALL_X=75#ボールのⅹ距離
+BALL_Y=75
 
 # 関数宣言部
 def elise(ball_lst: list,judge: list)-> list:
@@ -46,14 +49,16 @@ class Koukaton(pg.sprite.Sprite):
         self.image.set_alpha(128)
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.center = self.i*70,self.j*50
+        self.rect.center = self.i*BALL_X,self.j*BALL_Y
                 
 
     
     def update(self,screen:pg.surface,bb_img:pg.image):
         screen.set_alpha(128)
-        pg.draw.circle(screen, self.col, (self.rect.centerx+RAD,self.rect.centery+RAD), RAD)
-        screen.blit(bb_img, [self.rect.centerx, self.rect.centery])
+        screen.set_colorkey((0, 0, 0))
+        if self.col is not None:
+            pg.draw.circle(screen, self.col, (self.rect.centerx+RAD,self.rect.centery+RAD), RAD)
+            screen.blit(bb_img, [self.rect.centerx, self.rect.centery])
 
 
 
@@ -131,8 +136,14 @@ def main():
                 status="game:1"
 
             case "game:1":  
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(Koukaton(lis.get_lis(),(i,j)))
                 ball.update(screen,kk_img)                               
                 ball.draw(screen)
+                time.sleep(2)
+                lis= PuzzleList()
+
                 
 
         # 共通処理部
