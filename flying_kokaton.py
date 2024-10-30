@@ -92,9 +92,15 @@ class Combo:
 
     def __init__(self, lis:list[list]):
         self.lis = lis
-        self.row_combo()
-        self.column_combo()
-
+        co = True
+        check = 0
+        while co:
+            self.row_combo()
+            self.column_combo()
+            if check == self.combo_count:
+                co = False
+            check = self.combo_count
+            
     def row_combo(self):
        for i in range(6):
             stack = 0
@@ -103,17 +109,20 @@ class Combo:
                     stack -= 1
                     continue
                 combo_len = 3
-                if self.lis[i][j] == self.lis[i][j+1] and self.lis[i][j] == self.lis[i][j+2]:
+                if self.lis[i][j] == self.lis[i][j+1] and self.lis[i][j] == self.lis[i][j+2] and self.lis[i][j] != 0:
                     if j <= 2 and self.lis[i][j] == self.lis[i][j+3]:
                         combo_len += 1
                         if j <= 1 and self.lis[i][j] == self.lis[i][j+4]:
                             combo_len += 1
                             if j <= 0 and self.lis[i][j] == self.lis[i][j+5]:
                                 combo_len += 1
-                    self.combo_lis.append([1, i, j, combo_len])
+                    set = [1, i, j, combo_len]
                     self.combo_count += 1
                     stack += combo_len-1
                     print("j", [i, j], combo_len)
+                    self.elise(set)
+                    break
+                    
     
     def column_combo(self):
         for j in range(6):
@@ -123,34 +132,37 @@ class Combo:
                     stack -= 1
                     continue
                 combo_len = 3
-                if self.lis[i][j] == self.lis[i+1][j] and self.lis[i][j] == self.lis[i+2][j]:
+                if self.lis[i][j] == self.lis[i+1][j] and self.lis[i][j] == self.lis[i+2][j] and self.lis[i][j] != 0:
                     if i <= 2 and self.lis[i][j] == self.lis[i+3][j]:
                         combo_len += 1
                         if i <= 1 and self.lis[i][j] == self.lis[i+4][j]:
                             combo_len += 1
                             if i <= 0 and self.lis[i][j] == self.lis[i+5][j]:
                                 combo_len += 1
-                    self.combo_lis.append([2, i, j, combo_len])
+                    set = [2, i, j, combo_len]
                     self.combo_count += 1
                     stack += combo_len-1
                     print("i", [i, j], combo_len)
+                    self.elise(set)
+                    break
 
     def get_count(self):
         return self.combo_count
     
-    def elise(self, lis:list):
+    def get_lis(self):
+        return self.lis
+    
+    def elise(self, set:list):
         #引数:lst　ボールの種類を保持するリスト
         #コンボ判定されたball_lstを0にする
-        for set in self.combo_lis:
-            combo_type, i, j, combo_len = set
-            if combo_type == 1:
-                for n in range(combo_len):
-                    lis[i][j+n] = 0
-            elif combo_type == 2:
-                for n in range(combo_len):
-                    lis[i+n][j] = 0
-        self.combo_lis.clear()
-        return lis
+        combo_type, i, j, combo_len = set
+        if combo_type == 1:
+            for n in range(combo_len):
+                lis[i][j+n] = 0
+        elif combo_type == 2:
+            for n in range(combo_len):
+                lis[i+n][j] = 0
+        self.lis = lis
 
 
 
@@ -177,106 +189,109 @@ def drop_down(lis:list[list])->list[list]:
 
 
 
-#実行確認用
+# 実行確認用
 # lis = [[1, 1, 1, 2, 4, 2], 
 #        [2, 2, 2, 3, 4, 4], 
 #        [3, 2, 1, 2, 4, 5], 
 #        [4, 4, 2, 5, 4, 5], 
 #        [3, 1, 3, 4, 4, 5], 
 #        [3, 3, 3, 2, 4, 1]]
-# count = 0
-# while True:
-#     check = Combo(lis)
-#     co = check.get_count()
-#     if co <= 0:
-#         print(co)
-#         break
-#     lis = check.elise(lis)
-#     print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
-#     print()
-#     lis = drop_down(lis)
-#     print()
-#     print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
-#     count += 1
-#     print("count", count, "co", co)
+lis_m = PuzzleList()
+lis = lis_m.get_lis()
+print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5], "\n")
+count = 0
+while True:
+    check = Combo(lis)
+    co = check.get_count()
+    if co <= 0:
+        print(co)
+        break
+    lis = check.get_lis()
+    print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
+    print()
+    lis = drop_down(lis)
+    print()
+    print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
+    count += 1
+    print("count", count, "co", co)
 
-# main関数
-def main():
-    pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((WIDTH, HEIGHT))
-    clock  = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg.jpg")
-    bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
-    # ここから 練習2
-    kk_img = pg.image.load("fig/3.png")
-    kk_img = pg.transform.flip(kk_img, True, False)
-    # ここから 練習8-1 rectの初期座標設定
-    kk_rct = kk_img.get_rect()
-    kk_rct.center = 300,200
-    # ここまで
+# # main関数
+# def main():
+#     pg.display.set_caption("はばたけ！こうかとん")
+#     screen = pg.display.set_mode((WIDTH, HEIGHT))
+#     clock  = pg.time.Clock()
+#     bg_img = pg.image.load("fig/pg_bg.jpg")
+#     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
+#     # ここから 練習2
+#     kk_img = pg.image.load("fig/3.png")
+#     kk_img = pg.transform.flip(kk_img, True, False)
+#     # ここから 練習8-1 rectの初期座標設定
+#     kk_rct = kk_img.get_rect()
+#     kk_rct.center = 300,200
+#     # ここまで
 
-    score = Score()
+#     score = Score()
 
-    tmr = 0 # 時間保存
+#     tmr = 0 # 時間保存
 
-    """
-    status変数について
-    本変数では画面・実行機能を選択する値を管理します。
-    次の状態を代入してあげるだけで簡単に遷移を実現できます
-    以下の範囲に基づいて使用してください
+#     """
+#     status変数について
+#     本変数では画面・実行機能を選択する値を管理します。
+#     次の状態を代入してあげるだけで簡単に遷移を実現できます
+#     以下の範囲に基づいて使用してください
 
-    {機能名}:{状態番号}
+#     {機能名}:{状態番号}
 
-    例
-    ホーム画面に関する機能
-    status = "home:0"
-    """
-    status:str = "home:0"
-    # ここまで
+#     例
+#     ホーム画面に関する機能
+#     status = "home:0"
+#     """
+#     status:str = "home:0"
+#     # ここまで
 
-    while True:
-        # 共通処理部
+#     while True:
+#         # 共通処理部
 
-        # 各statusに基づく処理部
-        match status:
-            case "home:0":
-                for event in pg.event.get():
-                    # キーが押されたらゲーム画面へ
-                    if event.type == pg.KEYDOWN:
-                        status = "game:0"
-                        break
-            case "game:0":                                 
-                for event in pg.event.get():
-                    if event.type == pg.QUIT: return
+#         # 各statusに基づく処理部
+#         match status:
+#             case "home:0":
+#                 for event in pg.event.get():
+#                     # キーが押されたらゲーム画面へ
+#                     if event.type == pg.KEYDOWN:
+#                         status = "game:0"
+#                         break
+#             case "game:0":                                 
+#                 for event in pg.event.get():
+#                     if event.type == pg.QUIT: return
 
-                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+#                 key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
                 
-                # 練習8-4 方向キーの押下状態を繁栄
-                kk_rct_tmp = (
-                    key_lst[pg.K_RIGHT] * 2 + key_lst[pg.K_LEFT] * (-1) - 1,
-                    key_lst[pg.K_UP] * (-1) + key_lst[pg.K_DOWN] * 1
-                    )
-                kk_rct.move_ip(kk_rct_tmp)
+#                 # 練習8-4 方向キーの押下状態を繁栄
+#                 kk_rct_tmp = (
+#                     key_lst[pg.K_RIGHT] * 2 + key_lst[pg.K_LEFT] * (-1) - 1,
+#                     key_lst[pg.K_UP] * (-1) + key_lst[pg.K_DOWN] * 1
+#                     )
+#                 kk_rct.move_ip(kk_rct_tmp)
                 
 
 
-                # 練習7
-                for i in range(4):
-                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
+#                 # 練習7
+#                 for i in range(4):
+#                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                 
-                screen.blit(kk_img, kk_rct)
+#                 screen.blit(kk_img, kk_rct)
 
-                score.update(screen)
+#                 score.update(screen)
 
-        # 共通処理部
+#         # 共通処理部
         
-        pg.display.update()
-        tmr += 1        
-        clock.tick(200)
+#         pg.display.update()
+#         tmr += 1        
+#         clock.tick(200)
 
 
-if __name__ == "__main__":
-    pg.init()
-    main()
-    pg.quit()
-    sys.exit()
+# if __name__ == "__main__":
+#     pg.init()
+#     main()
+#     pg.quit()
+#     sys.exit()
