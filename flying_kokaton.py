@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import random
 import sys
@@ -80,13 +81,13 @@ class PuzzleList():
         self.lis=self.puzzle_generate(6,6)
         
 
-    def puzzle_generate(self,rows, cols):
-        array = [[0] * cols for _ in range(rows)]  # 初期化
+    def puzzle_generate(self,rows:int, cols:int)->np.ndarray:
+        array = np.array([[0] * cols for _ in range(rows)])  # 初期化
 
         for i in range(rows):
             for j in range(cols):
                 while True:
-                    num = random.randint(1, 5)  # 0から9の間のランダムな数
+                    num = np.random.randint(1, 6)  # 1から5の間のランダムな数
                     # 同じ行または列に3つ連続していないかを確認
                     if (j < 2 or array[i][j-1] != num or array[i][j-2] != num) and \
                     (i < 2 or array[i-1][j] != num or array[i-2][j] != num):
