@@ -1,16 +1,12 @@
 import os
-from random import randint as ran
 import sys
+import uuid
 import pygame as pg
-import pygame
-from typing import List
-import sys
-import pygame
 from pygame.locals import *
+from module.kari import Text, draw_text
+from random import randint as ran
+from typing import List
 
-from module.otamesi import Text, draw_text, event_loop
-
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 定数宣言部
 HEIGHT = 650
@@ -44,49 +40,143 @@ class PuzzleList():
     
     def get_lis(self):
         return self.lis
+    
+
+# クラス宣言部
+
+class Score:
+    """
+    スコア管理システム
+    """
+    def __init__(self, player_name:str = "guest"):
+        """
+        スコアをユーザと紐づけます
+        担当 : c0a23019
+        
+        :param str player_name: プレイヤー名
+        """
+        # スコア情報系
+        self.value = 0
+        self.player_name = player_name
+        self.player_uuid = uuid.uuid1()
+        # TODO: 遊んだ時間のlog取得
+
+        # 表示系
+        self.font = pg.font.Font(None, 50)
+        self.color = (0, 0, 255)
+        self.image = self.font.render(f"Score: {self.value}", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = 100, 100
+
+    def update(self, screen: pg.Surface):
+        """
+        スコア表示
+
+        :param Surface screen: スクリーン情報
+        """
+        self.image = self.font.render(f"Score: {self.value}", 0, self.color)
+        screen.blit(self.image, self.rect)
+
+    def add(self, add_score:int):
+        """
+        スコア加算
+
+        :param int add_score: 加算したい値
+        """
+        self.value += add_score
+
+    def __delattr__(self) -> None:
+        # TODO: クラス削除時にスコアをファイルに保存する
+        pass
 
 
-# def homemenu(screen):
-#     font1 = pygame.font.SysFont("yumincho", 50)
-#     text1 = font1.render("名前を入力", True, (0, 255, 0))
-#     screen.blit(text1, (40, 30))
-#     text = Text()  # テキスト処理のロジックTextクラスをインスタンス化
-#     pygame.key.start_text_input()  # input, editingイベントをキャッチするようにする
-#     draw_text(format(text, screen))
+# # テキスト描画用関数
+# def draw_text(screen, font, text, position):
+#     text_surface = font.render(text, True, (0, 0, 0))
+#     screen.blit(text_surface, position)
+
+def event_loop(screen, text, font):
+    """名前入力時のイベントループ処理"""
+    editing_text = ""  # 変換中のテキストを一時的に格納
+
+    while True:
+        screen.fill((255, 255, 255))
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:  # Enterキーで入力を確定
+                    return str(text)  # 名前を返す
+                elif event.key == pg.K_BACKSPACE:  # バックスペースで文字削除
+                    text.delete_left_of_cursor()
+                elif event.key == pg.K_DELETE:  # デリートキーで右の文字削除
+                    text.delete_right_of_cursor()
+                elif event.key == pg.K_LEFT:  # カーソルを左に移動
+                    text.move_cursor_left()
+                elif event.key == pg.K_RIGHT:  # カーソルを右に移動
+                    text.move_cursor_right()
+
+            elif event.type == pg.TEXTEDITING:
+                # 編集中のテキストとカーソル位置を取得
+                editing_text = event.text
+                editing_cursor_pos = event.start
+                displayed_text = text.edit(editing_text, editing_cursor_pos)
+
+            elif event.type == pg.TEXTINPUT:
+                # 確定したテキストを追加
+                text.input(event.text)
+                editing_text = ""  # 確定後は変換中のテキストをリセット
+
+        # 現在の入力文字列を描画（変換中のテキストも含む）
+        if editing_text:
+            displayed_text = text.edit(editing_text, len(editing_text))
+        else:
+            displayed_text = str(text)
+        
+        draw_text(screen, font, displayed_text, (50, 300))
+        pg.display.update()
 
 
 
+# メイン処理関数
 def main():
-    #初期値宣言部
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    clock  = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg.jpg")
+    clock = pg.time.Clock()
+
+    # 名前入力用のTextインスタンスを作成
+    font = pg.font.SysFont("yumincho", 30)
+    text = Text()  # Text クラスをインスタンス化
+    pg.key.start_text_input()  # テキスト入力を開始
+
+    player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+    pg.key.stop_text_input()  # テキスト入力を停止
+    print(f"Player Name: {player_name}")
+
+    # 背景画像の読み込み
+    bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
-    # ここから 練習2
-    kk_img = pg.image.load("fig/3.png")
+    
+    # キャラクター画像の読み込みと設定
+    kk_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
-    # ここから 練習8-1 rectの初期座標設定
+
+    # キャラクターの初期座標設定
     kk_rct = kk_img.get_rect()
-    kk_rct.center = 300,200
-    # ここまで
+    kk_rct.center = 300, 200
 
-    font = pygame.font.SysFont("yumincho", 30)
+    score = Score()
 
-    start_img = pg.image.load("fig/0D9A6898-HDR.jpg")
 
-    start_rct = start_img.get_rect()
-    start_rct.center = 300, 200
+    # start_img = pg.image.load("fig/0D9A6898-HDR.jpg")
+
+    # start_rct = start_img.get_rect()
+    # start_rct.center = 300, 200
 
     text = Text()
-
-    event_trigger = {
-        K_BACKSPACE: text.delete_left_of_cursor,
-        K_DELETE: text.delete_right_of_cursor,
-        K_LEFT: text.move_cursor_left,
-        K_RIGHT: text.move_cursor_right,
-        K_RETURN: text.enter,
-    }
 
     tmr = 0 # 時間保存
 
@@ -104,8 +194,6 @@ def main():
     """
     status:str = "home:0"
 
-    # ここまで
-
     while True:
         # 共通処理部
 
@@ -114,34 +202,12 @@ def main():
             case "home:0":
                 status = "home:1"
             case "home:1":
-                if pg.key.get_pressed()[pg.K_LALT]:
-                        status = "game:0"
-                        continue
                 for event in pg.event.get():
-                    screen.blit(start_img, start_rct)
-                    # キーダウンかつ、全角のテキスト編集中でない
-                    if event.type == KEYDOWN and not text.is_editing:
-                        if event.key in event_trigger.keys():
-                            input_text = event_trigger[event.key]()
-                    # 入力の確定
-                        if event.unicode in ("\r", "") and event.key == K_RETURN:
-                            print(input_text)  # 確定した文字列を表示
-                            draw_text(text, screen)  # テキストボックスに"|"を表示
-                            input_text = text, screen  # "|"に戻す
-                            break
-                    elif event.type == TEXTEDITING:  # 全角入力
-                        input_text = text.edit(event.text, event.start)
-                    elif event.type == TEXTINPUT:  # 半角入力、もしくは全角入力時にenterを押したとき
-                        input_text = text.input(event.text)
-                    # 描画しなおす必要があるとき
-                    if event.type in [KEYDOWN, TEXTEDITING, TEXTINPUT]:
-                        draw_text(input_text, screen)
-                    font1 = pygame.font.SysFont("yumincho", 50)
-                    text1 = font1.render("名前を入力", True, (0, 255, 0))
-                    screen.blit(text1, (100, 130))
-                    text = Text()  # テキスト処理のロジックTextクラスをインスタンス化
-                    pygame.key.start_text_input()  # input, editingイベントをキャッチするようにする
-                    draw_text(text, screen)
+                    # キーが押されたらゲーム画面へ
+                        # 名前入力待ち
+                    if event.type == pg.K_ESCAPE:
+                        status = "game:0"
+                        break
             case "game:0":                                 
                 for event in pg.event.get():
                     if event.type == pg.QUIT: return
@@ -163,12 +229,13 @@ def main():
                 
                 screen.blit(kk_img, kk_rct)
 
+                score.update(screen)
+
         # 共通処理部
         
         pg.display.update()
         tmr += 1        
         clock.tick(200)
-
 
 if __name__ == "__main__":
     pg.init()
