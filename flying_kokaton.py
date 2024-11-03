@@ -1,8 +1,6 @@
 import numpy as np
 import os
-import random
 import sys
-import time
 import pygame as pg
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
