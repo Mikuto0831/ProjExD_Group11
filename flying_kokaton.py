@@ -42,8 +42,6 @@ class KoukatonDrop(pg.sprite.Sprite):
         self.kk_img = pg.image.load("fig/3.png")
         self.kk_img = pg.transform.flip(self.kk_img, True, False)
         self.kk_img.fill((255,255,255,128),None, pg.BLEND_RGBA_MULT)
-        print(ball_list)
-        #self.image = pg.Surface([WIDTH,HEIGHT])
         self.image = pg.Surface((2*RAD, 2*RAD))
         self.i=num[0]
         self.j=num[1]

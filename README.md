@@ -37,5 +37,5 @@
 * 連絡に関しては各自Google チャットを見ること
 * なるべく関数化し、可読性を挙げること
 * main関数は基本的にmatch文
-* randomはnumpy.randomのを使う 形式や関数の使い方が違う可能性があるので確認する
+* randomはnp.randomを使う 形式や関数の使い方が違う可能性があるので確認する
 * numpyがimport出来ない時はターミナルに「pip install numpy」と打ちインストールすれば使える
