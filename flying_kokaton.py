@@ -100,7 +100,9 @@ def event_loop(screen, text, font):
     editing_text = ""  # 変換中のテキストを一時的に格納
 
     while True:
-        screen.fill((255, 255, 255))
+        bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\2A8A8887-518x800.jpg")
+        bg_rct = bg_img.get_rect()
+        screen.blit(bg_img, bg_rct)
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -118,6 +120,8 @@ def event_loop(screen, text, font):
                     text.move_cursor_left()
                 elif event.key == pg.K_RIGHT:  # カーソルを右に移動
                     text.move_cursor_right()
+                elif event.key == pg.K_ESCAPE:
+                    return
 
             elif event.type == pg.TEXTEDITING:
                 # 編集中のテキストとカーソル位置を取得
@@ -152,9 +156,9 @@ def main():
     text = Text()  # Text クラスをインスタンス化
     pg.key.start_text_input()  # テキスト入力を開始
 
-    player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
-    pg.key.stop_text_input()  # テキスト入力を停止
-    print(f"Player Name: {player_name}")
+    # player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+    # # pg.key.stop_text_input()  # テキスト入力を停止
+    # print(f"Player Name: {player_name}")
 
     # 背景画像の読み込み
     bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\pg_bg.jpg")
@@ -204,10 +208,11 @@ def main():
             case "home:1":
                 for event in pg.event.get():
                     # キーが押されたらゲーム画面へ
-                        # 名前入力待ち
-                    if event.type == pg.K_ESCAPE:
-                        status = "game:0"
-                        break
+                    player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+                    # pg.key.stop_text_input()  # テキスト入力を停止
+                    print(f"Player Name: {player_name}")
+                    status = "game:0"
+                    break
             case "game:0":                                 
                 for event in pg.event.get():
                     if event.type == pg.QUIT: return
