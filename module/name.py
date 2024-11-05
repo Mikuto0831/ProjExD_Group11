@@ -101,7 +101,7 @@ def event_loop(screen, text, font):
 
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_RETURN:  # Enterキーで入力を確定
-                    return str(text)  # 名前を返す
+                    return str(text).rstrip("|")  # 名前を返す
                 elif event.key == pg.K_BACKSPACE:  # バックスペースで文字削除
                     text.delete_left_of_cursor()
                 elif event.key == pg.K_DELETE:  # デリートキーで右の文字削除
