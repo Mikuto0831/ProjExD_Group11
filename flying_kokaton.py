@@ -1,6 +1,8 @@
 import numpy as np
+import datetime
 import os
 import sys
+import uuid
 import pygame as pg
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -64,6 +66,124 @@ class KoukatonDrop(pg.sprite.Sprite):
 
 
 
+class ScoreLogDAO:
+    """
+    それぞれのスコアデータの入出力を管理するクラス
+    TODO: できればデータベース化
+    """
+    def __init__(self,log_file_name:str = "score_log.csv", file_encoding:str = "utf-8") -> None:
+        """
+        スコアログを保存する先がなければ作成する
+        また、任意のファイル名へと変更できる
+        保存先のパスは"./logs"内になる
+
+        :param str log_file_name: ファイル名
+        :param str file_encoding: ファイルのエンコード方式
+        """
+        self.file_encoding = file_encoding
+        self.log_file_path = "./logs"
+
+        if not os.path.exists(self.log_file_path):
+            # フォルダがなければ作成する
+            os.mkdir(self.log_file_path)
+        
+        self.log_file = self.log_file_path + "/" + log_file_name
+        if not os.path.exists(self.log_file):
+            # ログファイルがなければ初期化する
+            with open(self.log_file, "w", encoding=self.file_encoding) as f:
+                f.write("uuid,player_name,score,created_time\n")
+
+        # タイムスタンプ準備
+        t_delta = datetime.timedelta(hours=9)
+        jts = datetime.timezone(t_delta, 'JST')
+        self.now = datetime.datetime.now(jts)
+    
+    def insert(self, uuid:str, player_name:str, score:int) -> bool:
+        """
+        プレイログを挿入する
+
+        :param str uuid: UUID
+        :param str player_name: プレイヤー名
+        :param str score:
+        :return: 成功したらTrueを返します
+        :rtype: bool
+        """
+        with open(self.log_file, "a", encoding=self.file_encoding) as f:
+            f.write(f"{uuid},{player_name},{score},{self.now.strftime('%Y/%m/%d %H:%M:%S')}\n")
+
+        return True
+    
+    def get(self)->list[tuple[str,str,int,str]]:
+        """
+        保存されているプレイログデータを取得します
+
+        :return: ログデータのtupleを返します
+        :rtype: tuple[tuple[str,str,int,str]]
+        """
+        result = []
+        with open(self.log_file, "r", encoding=self.file_encoding) as f:
+            f.readline()
+            result += [self.dismantling(row) for row in f]
+        
+        return result
+
+    def dismantling(self,row:str)->tuple[str,str,str,str]:
+        """
+        プレイログデータの一行をそれぞれの要素に分解し、tupleで返します
+
+        :return: uuid, player_name, score, created_time
+        :rtype: tuple[str,str,str,str]
+        """
+        datas = row.rstrip("\n").rsplit(",")
+
+        return tuple(datas)
+
+class Score:
+    """
+    スコア管理システム
+    """
+    def __init__(self, session:ScoreLogDAO, player_name:str = "guest"):
+        """
+        スコアをユーザと紐づけます
+        担当 : c0a23019
+        
+        :param str player_name: プレイヤー名
+        """
+        self.session = session
+
+        # スコア情報系
+        self.value = 0
+        self.player_name = player_name
+        self.player_uuid = str(uuid.uuid1())
+        # TODO: 遊んだ時間のlog取得
+
+        # 表示系
+        self.font = pg.font.Font(None, 50)
+        self.color = (0, 0, 255)
+        self.image = self.font.render(f"Score: {self.value}", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = 100, 100
+
+    def update(self, screen: pg.Surface):
+        """
+        スコア表示
+
+        :param Surface screen: スクリーン情報
+        """
+        self.image = self.font.render(f"Score: {self.value}", 0, self.color)
+        screen.blit(self.image, self.rect)
+
+    def add(self, add_score:int):
+        """
+        スコア加算
+
+        :param int add_score: 加算したい値
+        """
+        self.value += add_score
+
+    def save(self) -> None:
+        # TODO: クラス削除時にスコアをファイルに保存する
+        self.session.insert(self.player_uuid, self.player_name, self.value)
 
 class PuzzleList():
     """
@@ -98,14 +218,20 @@ class PuzzleList():
 
 
 
+# main関数
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
-    #ここから 練習8-1 rectの初期座標設定
-    #ここまで
+    # ここから 練習2
+    kk_img = pg.image.load("fig/3.png")
+    kk_img = pg.transform.flip(kk_img, True, False)
+    # ここから 練習8-1 rectの初期座標設定
+    kk_rct = kk_img.get_rect()
+    kk_rct.center = 300,200
+    # ここまで
 
     tmr = 0 # 時間保存
 
@@ -145,23 +271,50 @@ def main():
                 """
                 ゲームの初期化
                 """
+                score = Score(score_log_DAO)
+                status = "game:1"
                 t = lis.get_lis()
                 for i in range(len(t)):
                     for j in range(len(t[i])):
                         ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
                 status="game:1"
 
-            case "game:1":  
-                if tmr%400==0:
-                    for i in range(len(t)):
-                        for j in range(len(t[i])):
-                            ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+            
+
+
+
+            case "game:1":                                 
+                for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        score.save()
+                        return
+
+                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+                
+                # 練習8-4 方向キーの押下状態を繁栄
+                kk_rct_tmp = (
+                    key_lst[pg.K_RIGHT] * 2 + key_lst[pg.K_LEFT] * (-1) - 1,
+                    key_lst[pg.K_UP] * (-1) + key_lst[pg.K_DOWN] * 1
+                    )
+                kk_rct.move_ip(kk_rct_tmp)
+                
+
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
                     ball.update(screen)                               
                     ball.draw(screen)
                     
                     lis= PuzzleList()
 
+                # 練習7
+                for i in range(4):
+                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                 
+                screen.blit(kk_img, kk_rct)
+
+                score.add(10)
+                score.update(screen)
 
         # 共通処理部
         pg.display.update()
