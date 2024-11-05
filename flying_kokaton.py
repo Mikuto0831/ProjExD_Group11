@@ -197,7 +197,26 @@ class PuzzleList():
         3つ以上繋げることがないようにする
         """
         self.lis=self.puzzle_generate(6,6)
-        
+    
+    def get_lis(self):
+        return self.lis
+    
+    def move_lect(pos:list, key)-> int:
+        """
+        引数1: 現在の位置 (x, y) または (X, Y) を含むリスト
+        引数2: イベントキー（pg.K_UP, pg.K_DOWN, pg.K_LEFT, pg.K_RIGHT）
+        返り値：int型のxとy
+        """
+        x, y = pos # xとyを引数posとする
+        if key == pg.K_UP and y > 0: # 上矢印キーが押されたときかつyがフレーム内
+            y -= 1 # yを-1する
+        elif key == pg.K_DOWN and y < 6: # 下矢印キーが押されたときかつyがフレーム内
+            y += 1 # yを-1する
+        elif key == pg.K_LEFT and x > 0: # 左矢印キーが押されたときかつxがフレーム内
+            x -= 1 # xを-1する
+        elif key == pg.K_RIGHT and x < 6: # 右矢印キーが押されたときかつxがフレーム内
+            x += 1 # xを+1する
+        return x, y # xとyを返す        
 
     def puzzle_generate(self,rows:int, cols:int)->np.ndarray:
         array = np.array([[0] * cols for _ in range(rows)])  # 初期化
@@ -284,13 +303,14 @@ def main():
 
     # キャラクターの初期座標設定
     kk_rct = kk_img.get_rect()
-    kk_rct.center = 300, 200
-
-    score = Score()
-
-
+    kk_rct.center = 300,200
+    # ここまで
+    score_log_DAO = ScoreLogDAO()
+    drop_list_x = 0
+    drop_list_y = 0
+    change_list_X = 0
+    change_list_Y = 0
     text = Text()
-
     tmr = 0 # 時間保存
 
     ball = pg.sprite.Group()
@@ -311,7 +331,6 @@ def main():
 
     while True:
         # 共通処理部
-        
         event_list = pg.event.get()
         for event in event_list:
             if event.type == pg.QUIT: return
@@ -341,30 +360,39 @@ def main():
                 # 練習7
                 for i in range(4):
                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
-                for event in pg.event.get():
-                    if event.type == pg.QUIT:
-                        return
-
+                  
                 key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
                 
-                # 練習8-4 方向キーの押下状態を繁栄
-                kk_rct_tmp = (
-                    key_lst[pg.K_RIGHT] * 2 + key_lst[pg.K_LEFT] * (-1) - 1,
-                    key_lst[pg.K_UP] * (-1) + key_lst[pg.K_DOWN] * 1
-                    )
-                kk_rct.move_ip(kk_rct_tmp)
-                
-
+                for event in event_list:
+                    if event.type == pg.QUIT: return
+                    elif event.type == pg.KEYDOWN:
+                        x, y = PuzzleList.move_lect([x, y], event.key)
+                        if event.key == pg.K_RETURN: # ENTERが押されたとき
+                                status = "game:2"
                 for i in range(len(t)):
                     for j in range(len(t[i])):
                         ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
                     ball.update(screen)                               
                     ball.draw(screen)
-                    
-                    lis= PuzzleList()              
-                
-                score.add(10)
-                score.update(screen)
+
+                    lis= PuzzleList()       
+             case "game:2":
+              for event in event_list:
+                if event.type == pg.QUIT: return
+                    elif event.type == pg.KEYDOWN:
+                        change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
+                        if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
+                            PuzzleList.lis[change_list_X][change_list_Y],PuzzleList.lis[drop_list_x][drop_list_y] = PuzzleList.lis[drop_list_x][drop_list_y],PuzzleList.lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
+
+              for i in range(len(t)):
+                  for j in range(len(t[i])):
+                      ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                  ball.update(screen)                               
+                  ball.draw(screen)
+
+                  lis= PuzzleList()      
+              
+              status = "game:1"
 
         # 共通処理部
         pg.display.update()
