@@ -181,9 +181,9 @@ class Combo:
         self.elise(self.lis)
     
     def cross_combo(self):
-        for i in range(1, 5):
+        for i in range(1, len(self.lis) - 1):
             stack = 0
-            for j in range(4):
+            for j in range(len(self.lis) - 2):
                 if stack > 0:
                     stack -= 1
                     continue
@@ -191,13 +191,13 @@ class Combo:
                     stack += 2
                     print("cross", [i, j])
                     self.combo_add()
-                    self.change(3, i, j, self.lis[i][j])
+                    self.change(self.lis, i, j, 3, self.lis[i][j])
                     break
 
     def row_combo(self):
-       for i in range(6):
+       for i in range(len(self.lis)):
             stack = 0
-            for j in range(4):
+            for j in range(len(self.lis) - 2):
                 if stack > 0:
                     stack -= 1
                     continue
@@ -214,13 +214,13 @@ class Combo:
                         stack += combo_len-1
                         print("row", [i, j], combo_len)
                         self.combo_add()
-                        self.change(1, i, j, self.lis,combo_len)
+                        self.change(self.lis, i, j, 1, self.lis[i][j], combo_len)
                         break
                     
     def column_combo(self):
-        for j in range(6):
+        for j in range(len(self.lis)):
             stack = 0
-            for i in range(4):
+            for i in range(len(self.lis) - 2):
                 if stack > 0:
                     stack -= 1
                     continue
@@ -237,7 +237,7 @@ class Combo:
                         stack += combo_len-1
                         print("column", [i, j], combo_len)
                         self.combo_add()
-                        self.change(2, i, j, self.lis,combo_len)
+                        self.change(self.lis, i, j, 2, self.lis[i][j], combo_len)
                         
                         break
 
@@ -247,7 +247,7 @@ class Combo:
     def get_lis(self):
         return self.lis
     
-    def change(self, combo_type:int, i:int, j:int, ele:int = 0, combo_len:int = 1):
+    def change(self, lis:list[list], i:int, j:int, combo_type:int, ele:int = 0, combo_len:int = 1):
         #引数:lst　ボールの種類を保持するリスト
         #コンボ判定されたball_lstを0にする
         if ele >= 10:
@@ -306,7 +306,6 @@ def drop_down(lis:list[list])->list[list]:
                 jadge[i] = 1
         if all(jadge):
             check = False
-    time.sleep(1)
     return lis
 
 
@@ -334,3 +333,5 @@ def jadge_double(lis:list[list], i:int, j:int, combo_type:int, combo_len:int = 3
         return True
     else:
         return False
+    
+
