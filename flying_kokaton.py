@@ -18,6 +18,7 @@ WIDTH = 450
 RAD =25#こうかとんボールの半径
 BALL_X=75#ボールのⅹ距離
 BALL_Y=75
+TIMES  = 1000
 
 # 関数宣言部
 def elise(ball_lst: list,judge: list)-> list:
@@ -188,7 +189,7 @@ class KoukatonDrop(pg.sprite.Sprite):
         self.image = pg.Surface((2*RAD, 2*RAD))
         self.i=num[0]
         self.j=num[1]
-        self.col =__class__.color[ball_list[self.i][self.j]]
+        self.col =__class__.color[ball_list[self.j][self.i]]
         self.image.set_alpha(128)
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
@@ -339,7 +340,23 @@ class Score:
         """
         self.session.insert(self.player_uuid, self.player_name, self.value)
 
-
+class Time_circulate():
+    def __init__(self,past_time):
+        self.past_time= past_time
+        self.font=pg.font.SysFont("ha正楷書体pro",30)
+        self.mode=0
+    
+    def set_mode(self,count):
+        self.mode =count
+    
+    def settime(self,past_time):
+        self.past_time=past_time
+    def update(self,tmr,screen):
+        if self.mode==0:
+            txt = self.font.render(f"Operatinon time is 7second",True,(0,0,0))
+        else:
+            txt = self.font.render(f"Operatinon limit {7-(tmr-self.past_time)//150}second",True,(0,0,0))
+        screen.blit(txt,[0,100])
 # クラス宣言部
 class PuzzleList():
     """
@@ -369,16 +386,24 @@ class PuzzleList():
         引数2: イベントキー（pg.K_UP, pg.K_DOWN, pg.K_LEFT, pg.K_RIGHT）
         返り値：int型のxとy
         """
-        x, y = pos # xとyを引数posとする
+        y, x = pos # xとyを引数posとする
         if key == pg.K_UP and y > 0: # 上矢印キーが押されたときかつyがフレーム内
             y -= 1 # yを-1する
+            if y <0:
+                y = 0
         elif key == pg.K_DOWN and y < 6: # 下矢印キーが押されたときかつyがフレーム内
             y += 1 # yを-1する
+            if y>5:
+                y = 5
         elif key == pg.K_LEFT and x > 0: # 左矢印キーが押されたときかつxがフレーム内
             x -= 1 # xを-1する
+            if x < 0:
+                y = 0
         elif key == pg.K_RIGHT and x < 6: # 右矢印キーが押されたときかつxがフレーム内
             x += 1 # xを+1する
-        return x, y # xとyを返す        
+            if x >5:
+                x = 5
+        return y, x # xとyを返す        
 
     def puzzle_generate(self,rows:int, cols:int)->np.ndarray:
         array = np.array([[0] * cols for _ in range(rows)])  # 初期化
@@ -772,7 +797,7 @@ def main():
     # キャラクター画像の読み込みと設定
     kk_img = pg.image.load("./ex5/fig/3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
-
+    ball_img = pg.image.load("./ex5/fig/カーソル.png")
     # キャラクターの初期座標設定
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300,200
@@ -784,6 +809,7 @@ def main():
     change_list_Y = 0
     text = Text()
     tmr = 0 # 時間保存
+    tmrs=Time_circulate(tmr)
 
     ball = pg.sprite.Group()
 
@@ -843,32 +869,45 @@ def main():
                 for event in event_list:
                     if event.type == pg.QUIT: return
                     elif event.type == pg.KEYDOWN:
-                        x, y = PuzzleList.move_lect([x, y], event.key)
+                        drop_list_x, drop_list_y = PuzzleList.move_lect([drop_list_x, drop_list_y], event.key)
                         if event.key == pg.K_RETURN: # ENTERが押されたとき
                                 status = "game:2"
+                                tmrs.settime(tmr)
                 for i in range(len(t)):
                     for j in range(len(t[i])):
                         ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
                     ball.update(screen)                               
                     ball.draw(screen)
-
-                    lis= PuzzleList()       
+                screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
+                tmrs.set_mode(0)
+                tmrs.update(tmr,screen)       
             case "game:2":
+                tmrs.set_mode(1)
                 for event in event_list:
                     if event.type == pg.QUIT: return
                     elif event.type == pg.KEYDOWN:
+                        change_list_X,change_list_Y=drop_list_x,drop_list_y
                         change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
                         if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
-                            PuzzleList.lis[change_list_X][change_list_Y],PuzzleList.lis[drop_list_x][drop_list_y] = PuzzleList.lis[drop_list_x][drop_list_y],PuzzleList.lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
-
+                            lis.get_lis()[change_list_X][change_list_Y],lis.get_lis()[drop_list_x][drop_list_y] = lis.get_lis()[drop_list_x][drop_list_y],lis.get_lis()[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
+                            drop_list_x,drop_list_y = change_list_X,change_list_Y
+                            print(lis.get_lis())
+                        if event.key == pg.K_RETURN: # ENTERが押されたとき
+                            status = "game:1"
+                print(tmr-tmrs.past_time)
+                if tmr-tmrs.past_time>=TIMES:
+                    status="game:1"
+                for i in range(4):
+                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                 for i in range(len(t)):
                     for j in range(len(t[i])):
                         ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
                     ball.update(screen)                               
                     ball.draw(screen)
+                screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
+                tmrs.update(tmr,screen)
+                    #lis= PuzzleList()      
 
-                    lis= PuzzleList()      
-              
                 status = "game:1"
             
             case "log:0":
@@ -884,9 +923,6 @@ def main():
                 for event in event_list:
                     if event.key == pg.K_ESCAPE:
                         status = "home:0"
-                
-
-
 
         # 共通処理部
         pg.display.update()
