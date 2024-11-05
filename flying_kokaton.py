@@ -1,9 +1,8 @@
-import os
 import sys
 import uuid
 import pygame as pg
 from pygame.locals import *
-from module.kari import Text, draw_text
+from module.kari import Text, event_loop
 from random import randint as ran
 from typing import List
 
@@ -90,61 +89,6 @@ class Score:
         pass
 
 
-# # テキスト描画用関数
-# def draw_text(screen, font, text, position):
-#     text_surface = font.render(text, True, (0, 0, 0))
-#     screen.blit(text_surface, position)
-
-def event_loop(screen, text, font):
-    """名前入力時のイベントループ処理"""
-    editing_text = ""  # 変換中のテキストを一時的に格納
-
-    while True:
-        bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\2A8A8887-518x800.jpg")
-        bg_rct = bg_img.get_rect()
-        screen.blit(bg_img, bg_rct)
-
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                pg.quit()
-                sys.exit()
-
-            elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_RETURN:  # Enterキーで入力を確定
-                    return str(text)  # 名前を返す
-                elif event.key == pg.K_BACKSPACE:  # バックスペースで文字削除
-                    text.delete_left_of_cursor()
-                elif event.key == pg.K_DELETE:  # デリートキーで右の文字削除
-                    text.delete_right_of_cursor()
-                elif event.key == pg.K_LEFT:  # カーソルを左に移動
-                    text.move_cursor_left()
-                elif event.key == pg.K_RIGHT:  # カーソルを右に移動
-                    text.move_cursor_right()
-                elif event.key == pg.K_ESCAPE:
-                    return
-
-            elif event.type == pg.TEXTEDITING:
-                # 編集中のテキストとカーソル位置を取得
-                editing_text = event.text
-                editing_cursor_pos = event.start
-                displayed_text = text.edit(editing_text, editing_cursor_pos)
-
-            elif event.type == pg.TEXTINPUT:
-                # 確定したテキストを追加
-                text.input(event.text)
-                editing_text = ""  # 確定後は変換中のテキストをリセット
-
-        # 現在の入力文字列を描画（変換中のテキストも含む）
-        if editing_text:
-            displayed_text = text.edit(editing_text, len(editing_text))
-        else:
-            displayed_text = str(text)
-        
-        draw_text(screen, font, displayed_text, (50, 300))
-        pg.display.update()
-
-
-
 # メイン処理関数
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
@@ -155,10 +99,6 @@ def main():
     font = pg.font.SysFont("yumincho", 30)
     text = Text()  # Text クラスをインスタンス化
     pg.key.start_text_input()  # テキスト入力を開始
-
-    # player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
-    # # pg.key.stop_text_input()  # テキスト入力を停止
-    # print(f"Player Name: {player_name}")
 
     # 背景画像の読み込み
     bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\pg_bg.jpg")
@@ -174,11 +114,6 @@ def main():
 
     score = Score()
 
-
-    # start_img = pg.image.load("fig/0D9A6898-HDR.jpg")
-
-    # start_rct = start_img.get_rect()
-    # start_rct.center = 300, 200
 
     text = Text()
 
@@ -209,7 +144,8 @@ def main():
                 for event in pg.event.get():
                     # キーが押されたらゲーム画面へ
                     player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
-                    # pg.key.stop_text_input()  # テキスト入力を停止
+                    if not player_name:
+                        player_name = None
                     print(f"Player Name: {player_name}")
                     status = "game:0"
                     break
