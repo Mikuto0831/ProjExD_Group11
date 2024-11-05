@@ -1,19 +1,129 @@
+import numpy as np
 import datetime
 import os
-from random import randint as ran
 import sys
 import uuid
 import pygame as pg
+from pygame.locals import *
+from module.name import Text, event_loop
+from random import randint as ran
+from typing import List
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 定数宣言部
 HEIGHT = 650
 WIDTH = 450
+RAD =25#こうかとんボールの半径
+BALL_X=75#ボールのⅹ距離
+BALL_Y=75
 
+# 関数宣言部
+def elise(ball_lst: list,judge: list)-> list:
+    """
+    引数:ball_lst　ボールの色やなしを保持するリスト
+    引数:judge判定された
+    コンボ判定されたball_lstを0にする
+    judge =[[0,1],[0,2]]etc
+    """
+    for i in judge:
+        ball_lst[i[0]][i[1]] =0
+    return ball_lst
+
+def drop_down(lis:list[list])->list[list]:
+    check = True
+    while check:
+        for j in range(6):
+            if lis[0][j] == 0:
+                lis[0][j] = ran(1, 5)
+        for i in range(1, 6):
+            for j in range(6):
+                if lis[i][j] == 0:
+                    lis[i][j] = lis[i-1][j]
+                    lis[i-1][j] = 0
+        
+        jadge = [0 for n in range(6)]
+        for i in range(6):
+            if all(lis[i]):
+                jadge[i] = 1
+        if all(jadge):
+            check = False
+    return lis
+
+
+def jadge_combo(a, b):
+    if a == b or a + 10 == b or a == b + 10:
+        return True
+    else:
+        return False
+
+def jadge_double(lis:list[list], i:int, j:int, combo_type:int, combo_len:int = 3):
+    T = combo_len
+    if combo_type == 1:
+        for n in range(combo_len):
+            if lis[i][j+n] >= 10:
+                T -= 1
+    elif combo_type == 2:
+        for n in range(combo_len):
+            if lis[i+n][j] >= 10:
+                T -= 1
+    elif combo_type == 3:
+        if lis[i][j] >= 10 and lis[i][j+1] >= 10 and lis[i][j+2] >= 10 and lis[i-1][j+1] >= 10 and lis[i+1][j+1] >= 10:
+            T -= combo_len
+    elif combo_type == 4:
+        if lis[i][j] >= 10 and lis[i][j+2] >= 10 and lis[i+1][j] >= 10 and lis[i+1][j+1] >= 10 and lis[i+1][j+2] >= 10 and lis[i+2][j] >= 10 and lis[i+2][j+2]:
+            T -= combo_len
+    elif combo_type == 5:
+        for n in range(3):
+            if lis[i+n][j] >= 10:
+                    T -= 1
+                    if n == 2:
+                        for m in range(1, 3):
+                            if lis[i+n][j+m] >= 10:
+                                T -= 1
+    if T > 0:
+        return True
+    else:
+        return False
 
 
 # クラス宣言部
+class KoukatonDrop(pg.sprite.Sprite):
+    """
+    こうかとんに関するクラス
+    """
+    color=(
+        None,
+        (255,0,0),#赤
+        (0,0,255),#青
+        (0,255,0),#緑
+        (255,255,0),#黄
+        (136,72,152)#紫
+    )
+    def __init__(self,ball_list: list[list],num: tuple):
+        super().__init__()
+        self.kk_img = pg.image.load("fig/3.png")
+        self.kk_img = pg.transform.flip(self.kk_img, True, False)
+        self.kk_img.fill((255,255,255,128),None, pg.BLEND_RGBA_MULT)
+        self.image = pg.Surface((2*RAD, 2*RAD))
+        self.i=num[0]
+        self.j=num[1]
+        self.col =__class__.color[ball_list[self.i][self.j]]
+        self.image.set_alpha(128)
+        self.image.set_colorkey((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.center = self.i*BALL_X+12,self.j*BALL_Y+215
+                
+
+    
+    def update(self,screen:pg.surface):
+        screen.set_alpha(128)
+        screen.set_colorkey((0, 0, 0))
+        if self.col is not None:
+            # コンボして表示しない時を除いて表示する
+            pg.draw.circle(screen, self.col, (self.rect.centerx+RAD,self.rect.centery+RAD), RAD)
+            screen.blit(self.kk_img, [self.rect.centerx, self.rect.centery])
+        self.kill()
+
 class ScoreLogDAO:
     """
     それぞれのスコアデータの入出力を管理するクラス
@@ -133,8 +243,9 @@ class Score:
         # TODO: クラス削除時にスコアをファイルに保存する
         self.session.insert(self.player_uuid, self.player_name, self.value)
 
-      
-class PuzzleList:
+
+# クラス宣言部
+class PuzzleList():
     """
     パズル画面を管理するリストに関係するクラス
     担当:瀬尾
@@ -146,8 +257,9 @@ class PuzzleList:
         """
         盤面を生成する
         list[縦行数][横列数]
+        3つ以上繋げることがないようにする
         """
-        self.lis = [[ran(1,5) for d in range(6)] for n in range(6)]
+        self.lis=self.puzzle_generate(6,6)
     
     def get_lis(self):
         return self.lis
@@ -155,6 +267,36 @@ class PuzzleList:
     def set_lis(self, lis:list[list]):
         self.lis = lis
 
+    def move_lect(pos:list, key)-> int:
+        """
+        引数1: 現在の位置 (x, y) または (X, Y) を含むリスト
+        引数2: イベントキー（pg.K_UP, pg.K_DOWN, pg.K_LEFT, pg.K_RIGHT）
+        返り値：int型のxとy
+        """
+        x, y = pos # xとyを引数posとする
+        if key == pg.K_UP and y > 0: # 上矢印キーが押されたときかつyがフレーム内
+            y -= 1 # yを-1する
+        elif key == pg.K_DOWN and y < 6: # 下矢印キーが押されたときかつyがフレーム内
+            y += 1 # yを-1する
+        elif key == pg.K_LEFT and x > 0: # 左矢印キーが押されたときかつxがフレーム内
+            x -= 1 # xを-1する
+        elif key == pg.K_RIGHT and x < 6: # 右矢印キーが押されたときかつxがフレーム内
+            x += 1 # xを+1する
+        return x, y # xとyを返す        
+
+    def puzzle_generate(self,rows:int, cols:int)->np.ndarray:
+        array = np.array([[0] * cols for _ in range(rows)])  # 初期化
+
+        for i in range(rows):
+            for j in range(cols):
+                while True:
+                    num = np.random.randint(1, 6)  # 1から5の間のランダムな数
+                    # 同じ行または列に3つ連続していないかを確認
+                    if (j < 2 or array[i][j-1] != num or array[i][j-2] != num) and \
+                    (i < 2 or array[i-1][j] != num or array[i-2][j] != num):
+                        array[i][j] = num
+                        break
+        return array                        
 
 class Combo:
     """
@@ -318,7 +460,7 @@ class Combo:
     @classmethod
     def combo_add(self):
         Combo.combo_all += 1
-
+        
     @classmethod
     def get_combo(self):
         return Combo.combo_all
@@ -327,84 +469,124 @@ class Combo:
     def reset(self):
         Combo.combo_all = 0
 
+# main関数
+def main():
+    pg.display.set_caption("はばたけ！こうかとん")
+    screen = pg.display.set_mode((WIDTH, HEIGHT))
+    clock = pg.time.Clock()
 
-# 関数宣言部
-def drop_down(lis:list[list])->list[list]:
-    check = True
-    while check:
-        for j in range(6):
-            if lis[0][j] == 0:
-                lis[0][j] = ran(1, 5)
-        for i in range(1, 6):
-            for j in range(6):
-                if lis[i][j] == 0:
-                    lis[i][j] = lis[i-1][j]
-                    lis[i-1][j] = 0
-        
-        jadge = [0 for n in range(6)]
-        for i in range(6):
-            if all(lis[i]):
-                jadge[i] = 1
-        if all(jadge):
-            check = False
-    return lis
+    # 名前入力用のTextインスタンスを作成
+    font = pg.font.SysFont("yumincho", 30)
+    text = Text()  # Text クラスをインスタンス化
+    pg.key.start_text_input()  # テキスト入力を開始
 
-
-def jadge_combo(a, b):
-    if a == b or a + 10 == b or a == b + 10:
-        return True
-    else:
-        return False
-
-def jadge_double(lis:list[list], i:int, j:int, combo_type:int, combo_len:int = 3):
-    T = combo_len
-    if combo_type == 1:
-        for n in range(combo_len):
-            if lis[i][j+n] >= 10:
-                T -= 1
-    elif combo_type == 2:
-        for n in range(combo_len):
-            if lis[i+n][j] >= 10:
-                T -= 1
-    elif combo_type == 3:
-        if lis[i][j] >= 10 and lis[i][j+1] >= 10 and lis[i][j+2] >= 10 and lis[i-1][j+1] >= 10 and lis[i+1][j+1] >= 10:
-            T -= combo_len
-    elif combo_type == 4:
-        if lis[i][j] >= 10 and lis[i][j+2] >= 10 and lis[i+1][j] >= 10 and lis[i+1][j+1] >= 10 and lis[i+1][j+2] >= 10 and lis[i+2][j] >= 10 and lis[i+2][j+2]:
-            T -= combo_len
-    elif combo_type == 5:
-        for n in range(3):
-            if lis[i+n][j] >= 10:
-                    T -= 1
-                    if n == 2:
-                        for m in range(1, 3):
-                            if lis[i+n][j+m] >= 10:
-                                T -= 1
-    if T > 0:
-        return True
-    else:
-        return False
+    # 背景画像の読み込み
+    bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\pg_bg.jpg")
+    bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
     
-# 実行確認用
-lis = [[1, 1, 1, 2, 4, 2], 
-       [2, 2, 2, 3, 2, 4], 
-       [5, 2, 2, 2, 2, 5], 
-       [3, 4, 2, 5, 2, 5], 
-       [3, 1, 2, 4, 4, 5], 
-       [3, 3, 3, 2, 4, 1]]
-# lis_m = PuzzleList()
-# lis = lis_m.get_lis()
-print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5], "\n")
-while True:
-    check = Combo(lis)
-    co = check.get_count()
-    if co <= 0:
-        break
-    lis = check.get_lis()
-    print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
-    print()
-    lis = drop_down(lis)
-    print()
-    print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
-    print("combo",Combo.get_combo(), "co", co)
-Combo.reset()
+    # キャラクター画像の読み込みと設定
+    kk_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\3.png")
+    kk_img = pg.transform.flip(kk_img, True, False)
+
+    # キャラクターの初期座標設定
+    kk_rct = kk_img.get_rect()
+    kk_rct.center = 300,200
+    # ここまで
+    score_log_DAO = ScoreLogDAO()
+    drop_list_x = 0
+    drop_list_y = 0
+    change_list_X = 0
+    change_list_Y = 0
+    text = Text()
+    tmr = 0 # 時間保存
+
+    ball = pg.sprite.Group()
+    lis= PuzzleList()
+    """
+    status変数について
+    本変数では画面・実行機能を選択する値を管理します。
+    次の状態を代入してあげるだけで簡単に遷移を実現できます
+    以下の範囲に基づいて使用してください
+
+    例
+    ホーム画面に関する機能
+    status = "home:0"
+    """
+    status:str = "home:0"
+
+    while True:
+        # 共通処理部
+        event_list = pg.event.get()
+        for event in event_list:
+            if event.type == pg.QUIT: return
+
+        # 各statusに基づく処理部
+        match status:
+            case "home:0":
+                status = "home:1"
+            case "home:1":
+                player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+                if not player_name:
+                    player_name = None
+                print(f"Player Name: {player_name}")
+                status = "game:0"
+            
+            case "game:0":
+                """
+                ゲームの初期化
+                """
+                t = lis.get_lis()
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                status="game:1"
+
+            case "game:1":     
+                # 練習7
+                for i in range(4):
+                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
+                  
+                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+                
+                for event in event_list:
+                    if event.type == pg.QUIT: return
+                    elif event.type == pg.KEYDOWN:
+                        x, y = PuzzleList.move_lect([x, y], event.key)
+                        if event.key == pg.K_RETURN: # ENTERが押されたとき
+                                status = "game:2"
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                    ball.update(screen)                               
+                    ball.draw(screen)
+
+                    lis= PuzzleList()       
+            case "game:2":
+                for event in event_list:
+                    if event.type == pg.QUIT: return
+                    elif event.type == pg.KEYDOWN:
+                        change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
+                        if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
+                            PuzzleList.lis[change_list_X][change_list_Y],PuzzleList.lis[drop_list_x][drop_list_y] = PuzzleList.lis[drop_list_x][drop_list_y],PuzzleList.lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
+
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                    ball.update(screen)                               
+                    ball.draw(screen)
+
+                    lis= PuzzleList()      
+              
+                status = "game:1"
+
+        # 共通処理部
+        pg.display.update()
+        tmr += 1        
+        clock.tick(200)
+        print(status)
+
+if __name__ == "__main__":
+    pg.init()
+    main()
+    pg.quit()
+    sys.exit()

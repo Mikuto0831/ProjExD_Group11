@@ -3,13 +3,14 @@
 ## 実行環境の必要条件
 * python >= 3.10
 * pygame >= 2.1
+* numpy  >= 2.1.2
 
 ## ゲームの概要
 * パズルをそろえてこうかとんを倒すゲーム
 * 参考URL:[パズドラ https://pad.gungho.jp/member/]
 
 ## ゲームの遊び方
-*　同じ種類の球を3つ以上そろえる
+* 同じ種類の球を3つ以上そろえる
 * コンボをつなげる
 ## ゲームの実装
 ### 共通基本機能
@@ -36,3 +37,6 @@
 * 連絡に関しては各自Google チャットを見ること
 * なるべく関数化し、可読性を挙げること
 * main関数は基本的にmatch文
+* randomはnp.randomを使う 形式や関数の使い方が違う可能性があるので確認する
+* numpyがimport出来ない時はターミナルに「pip install numpy」と打ちインストールすれば使える
+* requirements.txtを設定として使う「pip install -r requirements.txt」必要
