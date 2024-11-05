@@ -906,9 +906,6 @@ def main():
                     ball.draw(screen)
                 screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
                 tmrs.update(tmr,screen)
-                    #lis= PuzzleList()      
-
-                status = "game:1"
             
             case "log:0":
                 lis = score_log_DAO.get()
