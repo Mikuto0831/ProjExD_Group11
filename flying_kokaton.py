@@ -10,7 +10,6 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # 定数宣言部
 HEIGHT = 650
 WIDTH = 450
-pg.mixer.init
 
 # クラス宣言部
 class ScoreLogDAO:
@@ -175,14 +174,11 @@ def main():
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300,200
     # ここまで
-    x = 0
-    y = 0
-    X = 0
-    Y = 0
-    mode = 0
     score_log_DAO = ScoreLogDAO()
-    
-
+    drop_list_x = 0
+    drop_list_y = 0
+    change_list_X = 0
+    change_list_Y = 0
     tmr = 0 # 時間保存
 
     """
@@ -211,19 +207,21 @@ def main():
                     if event.type == pg.KEYDOWN:
                         status = "game:0"
                         break
-            case "game:0":        
-                if mode == 0: #　モード０：始める場所を設定する　                     
-                    for event in pg.event.get():
-                        if event.type == pg.QUIT: return
-                        elif event.type == pg.KEYDOWN:
-                            x, y = PuzzleList.move_lect([x, y], event.key)
-                            if event.key == pg.K_RETURN: # ENTERが押されたとき
-                                mode = 1 #modeを1にする
-                elif mode == 1: # モード１：ゲームを開始する
-                    if event.type == pg.KEYDOWN:
-                        X, Y = PuzzleList.move_lect([X, Y], event.key)
-                        if (X,Y) != (x,y): # X,Yとx,yの値が一致していないとき
-                            PuzzleList.lis[X][Y],PuzzleList.lis[x][y] = PuzzleList.lis[x][y],PuzzleList.lis[X][Y] # PuzzleListクラスのlisの中身を入れ替える
+            case "game:0":   
+                status = "game:1"     
+                for event in pg.event.get():
+                    if event.type == pg.QUIT: return
+                    elif event.type == pg.KEYDOWN:
+                        x, y = PuzzleList.move_lect([x, y], event.key)
+                        if event.key == pg.K_RETURN: # ENTERが押されたとき
+                                status = "game:1"
+            case "game:1":
+                for event in pg.event.get():
+                    if event.type == pg.QUIT: return
+                    elif event.type == pg.KEYDOWN:
+                        change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
+                        if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
+                            PuzzleList.lis[change_list_X][change_list_Y],PuzzleList.lis[drop_list_x][drop_list_y] = PuzzleList.lis[drop_list_x][drop_list_y],PuzzleList.lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
                             
                 key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
                 
@@ -242,8 +240,7 @@ def main():
                 
                 screen.blit(kk_img, kk_rct)
 
-                score.add(10)
-                score.update(screen)
+                
 
         # 共通処理部
         
