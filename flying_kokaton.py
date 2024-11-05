@@ -1,16 +1,24 @@
 import datetime
 import os
-from random import randint as ran
 import sys
 import uuid
 import pygame as pg
+from pygame.locals import *
+from module.kari import Text, event_loop
+from random import randint as ran
+from typing import List
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 定数宣言部
 HEIGHT = 650
 WIDTH = 450
 
+# 関数宣言部
+def elise(ball_lst: list,judge: list)-> list:
+  for i in judge:
+        ball_lst[i[0]][i[1]] =0
+    return ball_lst
+  
 # クラス宣言部
 class ScoreLogDAO:
     """
@@ -131,6 +139,7 @@ class Score:
         # TODO: クラス削除時にスコアをファイルに保存する
         self.session.insert(self.player_uuid, self.player_name, self.value)
 
+# クラス宣言部
 class PuzzleList():
     """
     パズル画面を管理するリストに関係するクラス
@@ -143,7 +152,52 @@ class PuzzleList():
     
     def get_lis(self):
         return self.lis
+    
+    
+class Score:
+    """
+    スコア管理システム
+    """
+    def __init__(self, player_name:str = "guest"):
+        """
+        スコアをユーザと紐づけます
+        担当 : c0a23019
+        
+        :param str player_name: プレイヤー名
+        """
+        # スコア情報系
+        self.value = 0
+        self.player_name = player_name
+        self.player_uuid = uuid.uuid1()
+        # TODO: 遊んだ時間のlog取得
 
+        # 表示系
+        self.font = pg.font.Font(None, 50)
+        self.color = (0, 0, 255)
+        self.image = self.font.render(f"Score: {self.value}", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = 100, 100
+
+    def update(self, screen: pg.Surface):
+        """
+        スコア表示
+
+        :param Surface screen: スクリーン情報
+        """
+        self.image = self.font.render(f"Score: {self.value}", 0, self.color)
+        screen.blit(self.image, self.rect)
+
+    def add(self, add_score:int):
+        """
+        スコア加算
+
+        :param int add_score: 加算したい値
+        """
+        self.value += add_score
+
+    def __delattr__(self) -> None:
+        # TODO: クラス削除時にスコアをファイルに保存する
+        pass
 
 # 関数宣言部
 def elise(ball_lst: list,judge: list)-> list:
@@ -161,16 +215,29 @@ def elise(ball_lst: list,judge: list)-> list:
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    clock  = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg.jpg")
+    clock = pg.time.Clock()
+
+    # 名前入力用のTextインスタンスを作成
+    font = pg.font.SysFont("yumincho", 30)
+    text = Text()  # Text クラスをインスタンス化
+    pg.key.start_text_input()  # テキスト入力を開始
+
+    # 背景画像の読み込み
+    bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
-    # ここから 練習2
-    kk_img = pg.image.load("fig/3.png")
+    
+    # キャラクター画像の読み込みと設定
+    kk_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
-    # ここから 練習8-1 rectの初期座標設定
+
+    # キャラクターの初期座標設定
     kk_rct = kk_img.get_rect()
-    kk_rct.center = 300,200
-    # ここまで
+    kk_rct.center = 300, 200
+
+    score = Score()
+
+
+    text = Text()
 
     score_log_DAO = ScoreLogDAO()
     
@@ -190,7 +257,6 @@ def main():
     status = "home:0"
     """
     status:str = "home:0"
-    # ここまで
 
     while True:
         # 共通処理部
@@ -198,17 +264,22 @@ def main():
         # 各statusに基づく処理部
         match status:
             case "home:0":
+                status = "home:1"
+            case "home:1":
                 for event in pg.event.get():
                     # キーが押されたらゲーム画面へ
+                    player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+                    if not player_name:
+                        player_name = None
+                    print(f"Player Name: {player_name}")
+                    status = "game:0"
+                    break
+            case "game:0":
                     if event.type == pg.KEYDOWN:
                         status = "game:0"
                         break
 
-            case "game:0":
-                score = Score(score_log_DAO)
-                status = "game:1"
-
-            case "game:1":                                 
+            case "game:1":
                 for event in pg.event.get():
                     if event.type == pg.QUIT:
                         score.save()
@@ -231,7 +302,7 @@ def main():
                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                 
                 screen.blit(kk_img, kk_rct)
-
+                
                 score.add(10)
                 score.update(screen)
 
@@ -240,7 +311,6 @@ def main():
         pg.display.update()
         tmr += 1        
         clock.tick(200)
-
 
 if __name__ == "__main__":
     pg.init()
