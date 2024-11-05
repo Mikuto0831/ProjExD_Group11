@@ -208,29 +208,26 @@ def main():
                         status = "game:0"
                         break
             case "game:0":   
-                status = "game:1"     
+                if event.type == pg.KEYDOWN:
+                    status = "game:1"     
+        
+            case "game:1":
+                status = "game:2"
                 for event in pg.event.get():
                     if event.type == pg.QUIT: return
                     elif event.type == pg.KEYDOWN:
                         x, y = PuzzleList.move_lect([x, y], event.key)
                         if event.key == pg.K_RETURN: # ENTERが押されたとき
-                                status = "game:1"
-            case "game:1":
+                                status = "game:2"
+            case "game:2":
                 for event in pg.event.get():
                     if event.type == pg.QUIT: return
                     elif event.type == pg.KEYDOWN:
                         change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
                         if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
                             PuzzleList.lis[change_list_X][change_list_Y],PuzzleList.lis[drop_list_x][drop_list_y] = PuzzleList.lis[drop_list_x][drop_list_y],PuzzleList.lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
-                            
-                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+               
                 
-                # 練習8-4 方向キーの押下状態を繁栄
-                kk_rct_tmp = (
-                    key_lst[pg.K_RIGHT] * 2 + key_lst[pg.K_LEFT] * (-1) - 1,
-                    key_lst[pg.K_UP] * (-1) + key_lst[pg.K_DOWN] * 1
-                    )
-                kk_rct.move_ip(kk_rct_tmp)
                 
 
 
