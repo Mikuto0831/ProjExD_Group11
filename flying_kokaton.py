@@ -11,8 +11,6 @@ from typing import List
 HEIGHT = 650
 WIDTH = 450
 
-# クラス宣言部
-
 
 # 関数宣言部
 def elise(ball_lst: list,judge: list)-> list:
@@ -25,8 +23,9 @@ def elise(ball_lst: list,judge: list)-> list:
     for i in judge:
         ball_lst[i[0]][i[1]] =0
     return ball_lst
+    
 
-
+# クラス宣言部
 class PuzzleList():
     """
     パズル画面を管理するリストに関係するクラス
@@ -40,9 +39,7 @@ class PuzzleList():
     def get_lis(self):
         return self.lis
     
-
-# クラス宣言部
-
+    
 class Score:
     """
     スコア管理システム
