@@ -1,3 +1,4 @@
+import datetime
 import os
 from random import randint as ran
 import sys
@@ -12,21 +13,95 @@ WIDTH = 450
 pg.mixer.init
 
 # クラス宣言部
+class ScoreLogDAO:
+    """
+    それぞれのスコアデータの入出力を管理するクラス
+    TODO: できればデータベース化
+    """
+    def __init__(self,log_file_name:str = "score_log.csv", file_encoding:str = "utf-8") -> None:
+        """
+        スコアログを保存する先がなければ作成する
+        また、任意のファイル名へと変更できる
+        保存先のパスは"./logs"内になる
+
+        :param str log_file_name: ファイル名
+        :param str file_encoding: ファイルのエンコード方式
+        """
+        self.file_encoding = file_encoding
+        self.log_file_path = "./logs"
+
+        if not os.path.exists(self.log_file_path):
+            # フォルダがなければ作成する
+            os.mkdir(self.log_file_path)
+        
+        self.log_file = self.log_file_path + "/" + log_file_name
+        if not os.path.exists(self.log_file):
+            # ログファイルがなければ初期化する
+            with open(self.log_file, "w", encoding=self.file_encoding) as f:
+                f.write("uuid,player_name,score,created_time\n")
+
+        # タイムスタンプ準備
+        t_delta = datetime.timedelta(hours=9)
+        jts = datetime.timezone(t_delta, 'JST')
+        self.now = datetime.datetime.now(jts)
+    
+    def insert(self, uuid:str, player_name:str, score:int) -> bool:
+        """
+        プレイログを挿入する
+
+        :param str uuid: UUID
+        :param str player_name: プレイヤー名
+        :param str score:
+        :return: 成功したらTrueを返します
+        :rtype: bool
+        """
+        with open(self.log_file, "a", encoding=self.file_encoding) as f:
+            f.write(f"{uuid},{player_name},{score},{self.now.strftime('%Y/%m/%d %H:%M:%S')}\n")
+
+        return True
+    
+    def get(self)->list[tuple[str,str,int,str]]:
+        """
+        保存されているプレイログデータを取得します
+
+        :return: ログデータのtupleを返します
+        :rtype: tuple[tuple[str,str,int,str]]
+        """
+        result = []
+        with open(self.log_file, "r", encoding=self.file_encoding) as f:
+            f.readline()
+            result += [self.dismantling(row) for row in f]
+        
+        return result
+
+    def dismantling(self,row:str)->tuple[str,str,str,str]:
+        """
+        プレイログデータの一行をそれぞれの要素に分解し、tupleで返します
+
+        :return: uuid, player_name, score, created_time
+        :rtype: tuple[str,str,str,str]
+        """
+        datas = row.rstrip("\n").rsplit(",")
+
+        return tuple(datas)
+
 class Score:
     """
     スコア管理システム
     """
-    def __init__(self, player_name:str = "guest"):
+    def __init__(self, session:ScoreLogDAO, player_name:str = "guest"):
         """
         スコアをユーザと紐づけます
         担当 : c0a23019
         
         :param str player_name: プレイヤー名
         """
+        self.session = session
+
         # スコア情報系
         self.value = 0
         self.player_name = player_name
-        self.player_uuid = uuid.uuid1()
+        self.player_uuid = str(uuid.uuid1())
         # TODO: 遊んだ時間のlog取得
 
         # 表示系
@@ -53,9 +128,9 @@ class Score:
         """
         self.value += add_score
 
-    def __delattr__(self) -> None:
+    def save(self) -> None:
         # TODO: クラス削除時にスコアをファイルに保存する
-        pass
+        self.session.insert(self.player_uuid, self.player_name, self.value)
 
 class PuzzleList():
     """
@@ -105,7 +180,8 @@ def main():
     X = 0
     Y = 0
     mode = 0
-    score = Score()
+    score_log_DAO = ScoreLogDAO()
+    
 
     tmr = 0 # 時間保存
 
@@ -166,6 +242,7 @@ def main():
                 
                 screen.blit(kk_img, kk_rct)
 
+                score.add(10)
                 score.update(screen)
 
         # 共通処理部
