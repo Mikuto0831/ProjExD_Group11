@@ -54,7 +54,7 @@ class KoukatonDrop(pg.sprite.Sprite):
         self.image.set_alpha(128)
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.center = self.i*BALL_X,self.j*BALL_Y
+        self.rect.center = self.i*BALL_X+12,self.j*BALL_Y+215
                 
 
     
@@ -338,16 +338,21 @@ def main():
                 """
                 ゲームの初期化
                 """
+                status = "game:1"
                 t = lis.get_lis()
                 for i in range(len(t)):
                     for j in range(len(t[i])):
                         ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
-                status="game:1"
-                
-            case "game:1":                                 
+                status="game:1"           
+
+
+
+            case "game:1":     
+                # 練習7
+                for i in range(4):
+                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                 for event in pg.event.get():
                     if event.type == pg.QUIT:
-                        score.save()
                         return
 
                 key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
@@ -366,13 +371,7 @@ def main():
                     ball.update(screen)                               
                     ball.draw(screen)
                     
-                    lis= PuzzleList()
-
-                # 練習7
-                for i in range(4):
-                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
-                
-                screen.blit(kk_img, kk_rct)
+                    lis= PuzzleList()              
                 
                 score.add(10)
                 score.update(screen)
