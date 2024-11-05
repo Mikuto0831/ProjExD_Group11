@@ -113,7 +113,7 @@ class Combo:
                 if stack > 0:
                     stack -= 1
                     continue
-                if jadge_double(self.lis[i][j], self.lis[i][j+1], self.lis[i][j+2], self.lis[i-1][j+1], self.lis[i+1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i-1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]):
+                if jadge_double(self.lis, i, j, 3) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i-1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]):
                     stack += 2
                     print("cross", [i, j])
                     self.combo_add()
@@ -129,20 +129,21 @@ class Combo:
                     stack -= 1
                     continue
                 combo_len = 3
-                if jadge_double(self.lis[i][j], self.lis[i][j+1], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]):
+                if jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]):
                     if j <= 2 and jadge_combo(self.lis[i][j], self.lis[i][j+3]):
                         combo_len += 1
                         if j <= 1 and jadge_combo(self.lis[i][j], self.lis[i][j+4]):
                             combo_len += 1
                             if j <= 0 and jadge_combo(self.lis[i][j], self.lis[i][j+5]):
                                 combo_len += 1
-                    self.combo_count += 1
-                    stack += combo_len-1
-                    print("row", [i, j], combo_len)
-                    self.combo_add()
-                    self.change(1, i, j, self.lis[i][j],combo_len)
-                    time.sleep(0.5)
-                    break
+                    if jadge_double(self.lis, i, j, 1, combo_len):
+                        self.combo_count += 1
+                        stack += combo_len-1
+                        print("row", [i, j], combo_len)
+                        self.combo_add()
+                        self.change(1, i, j, self.lis[i][j],combo_len)
+                        time.sleep(0.5)
+                        break
                     
     def column_combo(self):
         for j in range(6):
@@ -152,20 +153,21 @@ class Combo:
                     stack -= 1
                     continue
                 combo_len = 3
-                if jadge_double(self.lis[i][j], self.lis[i+1][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]):
+                if jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]):
                     if i <= 2 and jadge_combo(self.lis[i][j], self.lis[i+3][j]):
                         combo_len += 1
                         if i <= 1 and self.lis[i][j] == self.lis[i+4][j]:
                             combo_len += 1
                             if i <= 0 and jadge_combo(self.lis[i][j], self.lis[i+5][j]):
                                 combo_len += 1
-                    self.combo_count += 1
-                    stack += combo_len-1
-                    print("column", [i, j], combo_len)
-                    self.combo_add()
-                    self.change(2, i, j, self.lis[i][j],combo_len)
-                    time.sleep(0.5)
-                    break
+                    if jadge_double(self.lis, i, j, 2, combo_len):
+                        self.combo_count += 1
+                        stack += combo_len-1
+                        print("column", [i, j], combo_len)
+                        self.combo_add()
+                        self.change(2, i, j, self.lis[i][j],combo_len)
+                        time.sleep(0.5)
+                        break
 
     def get_count(self):
         return self.combo_count
@@ -241,18 +243,31 @@ def jadge_combo(a, b):
     else:
         return False
 
-def jadge_double(a:int = 10, b:int = 10, c:int = 10, d:int = 10, e:int = 10, f:int = 10, g:int = 10, h:int = 10, i:int = 10):
-    if a >= 10 and b >= 10 and c >= 10 and d >= 10 and e >= 10 and f >= 10 and g >= 10 and h >= 10 and i >= 10:
-        return False
-    else:
+def jadge_double(lis:list[list], i:int, j:int, combo_type:int, combo_len:int = 3):
+    T = combo_len
+    if combo_type == 1:
+        for n in range(combo_len):
+            if lis[i][j+n] >= 10:
+                T -= 1
+    elif combo_type == 2:
+        for n in range(combo_len):
+            if lis[i+n][j] >= 10:
+                T -= 1
+    elif combo_type == 3:
+        for n in range(3):
+            if lis[i][j] >= 10 and lis[i-1][j+1] >= 10 and lis[i+1][j+1] >= 10:
+                T -= 1
+    if T > 0:
         return True
+    else:
+        return False
 
 # 実行確認用
 lis = [[1, 1, 1, 2, 4, 2], 
        [2, 2, 2, 3, 4, 4], 
-       [3, 2, 2, 2, 4, 5], 
+       [3, 2, 2, 2, 2, 5], 
        [4, 4, 2, 5, 4, 5], 
-       [3, 1, 3, 4, 4, 5], 
+       [3, 1, 2, 4, 4, 5], 
        [3, 3, 3, 2, 4, 1]]
 # lis_m = PuzzleList()
 # lis = lis_m.get_lis()
