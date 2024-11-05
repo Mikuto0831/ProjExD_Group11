@@ -313,39 +313,29 @@ def main():
         # 共通処理部
         
         event_list = pg.event.get()
+        for event in event_list:
+            if event.type == pg.QUIT: return
 
         # 各statusに基づく処理部
         match status:
             case "home:0":
-                for event in event_list:
-                    if event.type == pg.QUIT: return
                 status = "home:1"
             case "home:1":
-                for event in pg.event.get():
-                    # キーが押されたらゲーム画面へ
-                    player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
-                    if not player_name:
-                        player_name = None
-                    print(f"Player Name: {player_name}")
-                    status = "game:0"
-                    break
-            case "game:0":
-                    if event.type == pg.KEYDOWN:
-                        status = "game:0"
-                        break
+                player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+                if not player_name:
+                    player_name = None
+                print(f"Player Name: {player_name}")
+                status = "game:0"
             
             case "game:0":
                 """
                 ゲームの初期化
                 """
-                status = "game:1"
                 t = lis.get_lis()
                 for i in range(len(t)):
                     for j in range(len(t[i])):
                         ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
-                status="game:1"           
-
-
+                status="game:1"
 
             case "game:1":     
                 # 練習7
