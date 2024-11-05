@@ -77,7 +77,7 @@ def event_loop(screen, text, font):
     editing_text = ""  # 変換中のテキストを一時的に格納
 
     while True:
-        bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\2A8A8887-518x800.jpg")
+        bg_img = pg.image.load("./ex5/fig/2A8A8887-518x800.jpg")
         bg_rct = bg_img.get_rect()
 
         font1 = pygame.font.SysFont("hg正楷書体pro", 35)

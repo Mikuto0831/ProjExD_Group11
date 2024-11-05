@@ -101,7 +101,7 @@ class KoukatonDrop(pg.sprite.Sprite):
     )
     def __init__(self,ball_list: list[list],num: tuple):
         super().__init__()
-        self.kk_img = pg.image.load("fig/3.png")
+        self.kk_img = pg.image.load("./ex5/fig/3.png")
         self.kk_img = pg.transform.flip(self.kk_img, True, False)
         self.kk_img.fill((255,255,255,128),None, pg.BLEND_RGBA_MULT)
         self.image = pg.Surface((2*RAD, 2*RAD))
@@ -481,11 +481,11 @@ def main():
     pg.key.start_text_input()  # テキスト入力を開始
 
     # 背景画像の読み込み
-    bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\pg_bg.jpg")
+    bg_img = pg.image.load("./ex5/fig/pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
     
     # キャラクター画像の読み込みと設定
-    kk_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\3.png")
+    kk_img = pg.image.load("./ex5/fig/3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
 
     # キャラクターの初期座標設定
