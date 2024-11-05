@@ -60,20 +60,34 @@ def jadge_combo(a, b):
 def jadge_double(lis:list[list], i:int, j:int, combo_type:int, combo_len:int = 3):
     T = combo_len
     if combo_type == 1:
+        for n in range(3):
+            for m in range(3):
+                if lis[i+n][j+m] >= 10:
+                    T -= 1
+
+    elif combo_type == 11:
         for n in range(combo_len):
             if lis[i][j+n] >= 10:
                 T -= 1
-    elif combo_type == 2:
+
+    elif combo_type == 12:
         for n in range(combo_len):
             if lis[i+n][j] >= 10:
                 T -= 1
-    elif combo_type == 3:
+
+    elif combo_type == 21:
         if lis[i][j] >= 10 and lis[i][j+1] >= 10 and lis[i][j+2] >= 10 and lis[i-1][j+1] >= 10 and lis[i+1][j+1] >= 10:
             T -= combo_len
-    elif combo_type == 4:
-        if lis[i][j] >= 10 and lis[i][j+2] >= 10 and lis[i+1][j] >= 10 and lis[i+1][j+1] >= 10 and lis[i+1][j+2] >= 10 and lis[i+2][j] >= 10 and lis[i+2][j+2]:
+
+    elif combo_type == 22:
+        if lis[i][j] >= 10 and lis[i][j+2] >= 10 and lis[i+1][j] >= 10 and lis[i+1][j+1] >= 10 and lis[i+1][j+2] >= 10 and lis[i+2][j] >= 10 and lis[i+2][j+2] >= 10:
             T -= combo_len
-    elif combo_type == 5:
+    
+    elif combo_type == 23:
+        if lis[i][j] >= 10 and lis[i][j+2] >= 10 and lis[i+2][j] >= 10 and lis[i+2][j+2] >= 10 and lis[i][j+1] >= 10 and lis[i+2][j+1] >= 10 and lis[i+2][j+1] >= 10:
+            T -= combo_len
+
+    elif combo_type == 31:
         for n in range(3):
             if lis[i+n][j] >= 10:
                     T -= 1
@@ -81,10 +95,73 @@ def jadge_double(lis:list[list], i:int, j:int, combo_type:int, combo_len:int = 3
                         for m in range(1, 3):
                             if lis[i+n][j+m] >= 10:
                                 T -= 1
+
+    elif combo_type == 32:
+        for n in range(3):
+            if lis[i+n][j] >= 10:
+                    T -= 1
+                    if n == 2:
+                        for m in range(-2, 0):
+                            if lis[i+n][j+m] >= 10:
+                                T -= 1
+
+    elif combo_type == 33:
+        for n in range(3):
+            if lis[i+n][j] >= 10:
+                    T -= 1
+                    if n == 0:
+                        for m in range(1, 3):
+                            if lis[i+n][j+m] >= 10:
+                                T -= 1
+
+    elif combo_type == 34:
+        for n in range(3):
+            if lis[i][j+n] >= 10:
+                    T -= 1
+                    if n == 2:
+                        for m in range(1, 3):
+                            if lis[i+m][j+n] >= 10:
+                                T -= 1
+    elif combo_type == 41:
+        for n in range(3):
+            if lis[i][j+n] >= 10:
+                    T -= 1
+                    if n == 1:
+                        for m in range(1, 3):
+                            if lis[i+m][j+n] >= 10:
+                                T -= 1
+    elif combo_type == 42:
+        for n in range(3):
+            if lis[i+n][j] >= 10:
+                    T -= 1
+                    if n == 2:
+                        for m in range(-1, 2, 2):
+                            if lis[i+n][j+m] >= 10:
+                                T -= 1
+
+    elif combo_type == 43:
+        for n in range(3):
+            if lis[i+n][j] >= 10:
+                    T -= 1
+                    if n == 1:
+                        for m in range(1, 3):
+                            if lis[i+n][j+m] >= 10:
+                                T -= 1
+    
+    elif combo_type == 44:
+        for n in range(3):
+            if lis[i][j+n] >= 10:
+                    T -= 1
+                    if n == 2:
+                        for m in range(-1, 2, 2):
+                            if lis[i+m][j+n] >= 10:
+                                T -= 1
+
     if T > 0:
         return True
     else:
         return False
+
 
 
 # クラス宣言部
@@ -102,7 +179,9 @@ class KoukatonDrop(pg.sprite.Sprite):
     )
     def __init__(self,ball_list: list[list],num: tuple):
         super().__init__()
+
         self.kk_img = pg.image.load("./ex5/fig/3.png")
+
         self.kk_img = pg.transform.flip(self.kk_img, True, False)
         self.kk_img.fill((255,255,255,128),None, pg.BLEND_RGBA_MULT)
         self.image = pg.Surface((2*RAD, 2*RAD))
@@ -329,40 +408,166 @@ class Combo:
         self.lis = lis
         check = 0
         while True:
+            self.box_combo()
             self.h_combo()
-            self.l_combo()
+            self.i_combo()
+            self.t_combo()
+            self.t_combo_rev()
+            self.t_left_combo()
+            self.t_right_combo()
+            self.l_combo_dl()
+            self.l_combo_dr()
+            self.l_combo_ul()
+            self.l_combo_ur()
             self.cross_combo()
             self.row_combo()
             self.column_combo()
             if check == self.combo_count:
                 break
             check = self.combo_count
+        print("rep")
+        print(self.lis[0], "\n", self.lis[1], "\n", self.lis[2], "\n", self.lis[3], "\n", self.lis[4], "\n", self.lis[5])
         self.elise(self.lis)
     
+    def box_combo(self):
+        for i in range(len(self.lis) - 2):
+            stack = 0
+            for j in range(len(self.lis) - 2):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 1, 9) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+2]):
+                    stack += 2
+                    print("box", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 1, self.lis[i][j])
+                    break
+
     def h_combo(self):
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
                 if stack > 0:
                     continue
-                if jadge_double(self.lis, i, j, 4) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+2]):
+                if jadge_double(self.lis, i, j, 22) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+2]):
                     stack += 2
                     print("H", [i, j])
                     self.combo_add()
-                    self.change(self.lis, i, j, 4, self.lis[i][j])
+                    self.change(self.lis, i, j, 22, self.lis[i][j])
                     break
-    
-    def l_combo(self):
+        
+    def i_combo(self):
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
                 if stack > 0:
                     continue
-                if jadge_double(self.lis, i, j, 5, 5) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+2]):
+                if jadge_double(self.lis, i, j, 23) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+2]):
                     stack += 2
-                    print("L", [i, j])
+                    print("I", [i, j])
                     self.combo_add()
-                    self.change(self.lis, i, j, 5, self.lis[i][j])
+                    self.change(self.lis, i, j, 23, self.lis[i][j])
+                    break
+
+    def t_combo(self):
+        for i in range(len(self.lis) - 2):
+            stack = 0
+            for j in range(len(self.lis) - 2):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 41, 5) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+1]):
+                    stack += 2
+                    print("T", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 41, self.lis[i][j])
+                    break
+    
+    def t_combo_rev(self):
+        for i in range(len(self.lis) - 2):
+            stack = 0
+            for j in range(len(self.lis) - 2):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 42, 5) and jadge_combo(self.lis[i][j], self.lis[i+2][j-1]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j]):
+                    stack += 2
+                    print("T-rev", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 42, self.lis[i][j])
+                    break
+
+    def t_left_combo(self):
+        for i in range(len(self.lis) - 2):
+            stack = 0
+            for j in range(len(self.lis) - 2):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 43, 5) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+2]):
+                    stack += 2
+                    print("T-left", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 43, self.lis[i][j])
+                    break
+    
+    def t_right_combo(self):
+        for i in range(1, len(self.lis) - 1):
+            stack = 0
+            for j in range(len(self.lis) - 2):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 44, 5) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i-1][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+2]):
+                    stack += 2
+                    print("T-right", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 44, self.lis[i][j])
+                    break
+    
+    def l_combo_dl(self):
+        for i in range(len(self.lis) - 2):
+            stack = 0
+            for j in range(len(self.lis) - 2):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 31, 5) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+2]):
+                    stack += 2
+                    print("L-dl", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 31, self.lis[i][j])
+                    break
+
+    def l_combo_dr(self):
+        for i in range(len(self.lis) - 2):
+            stack = 0
+            for j in range(2, len(self.lis)):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 32, 5) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j-1]) and jadge_combo(self.lis[i][j], self.lis[i+2][j-2]):
+                    stack += 2
+                    print("L-dr", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 32, self.lis[i][j])
+                    break
+    def l_combo_ul(self):
+        for i in range(len(self.lis) - 2):
+            stack = 0
+            for j in range(len(self.lis) - 2):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 33, 5) and jadge_combo(self.lis[i][j], self.lis[i+1][j]) and jadge_combo(self.lis[i][j], self.lis[i+2][j]) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]):
+                    stack += 2
+                    print("L-ul", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 31, self.lis[i][j])
+                    break
+    def l_combo_ur(self):
+        for i in range(len(self.lis) - 2):
+            stack = 0
+            for j in range(len(self.lis) - 2):
+                if stack > 0:
+                    continue
+                if jadge_double(self.lis, i, j, 34, 5) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+2]) and jadge_combo(self.lis[i][j], self.lis[i+2][j+2]):
+                    stack += 2
+                    print("L-ur", [i, j])
+                    self.combo_add()
+                    self.change(self.lis, i, j, 34, self.lis[i][j])
                     break
     
     def cross_combo(self):
@@ -372,11 +577,11 @@ class Combo:
                 if stack > 0:
                     stack -= 1
                     continue
-                if jadge_double(self.lis, i, j, 3) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i-1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]):
+                if jadge_double(self.lis, i, j, 21) and jadge_combo(self.lis[i][j], self.lis[i][j+1]) and jadge_combo(self.lis[i][j], self.lis[i][j+2]) and jadge_combo(self.lis[i][j], self.lis[i-1][j+1]) and jadge_combo(self.lis[i][j], self.lis[i+1][j+1]):
                     stack += 2
                     print("cross", [i, j])
                     self.combo_add()
-                    self.change(self.lis, i, j, 3, self.lis[i][j])
+                    self.change(self.lis, i, j, 21, self.lis[i][j])
                     break
 
     def row_combo(self):
@@ -394,12 +599,12 @@ class Combo:
                             combo_len += 1
                             if j <= 0 and jadge_combo(self.lis[i][j], self.lis[i][j+5]):
                                 combo_len += 1
-                    if jadge_double(self.lis, i, j, 1, combo_len):
+                    if jadge_double(self.lis, i, j, 11, combo_len):
                         self.combo_count += 1
                         stack += combo_len-1
                         print("row", [i, j], combo_len)
                         self.combo_add()
-                        self.change(self.lis, i, j, 1, self.lis[i][j], combo_len)
+                        self.change(self.lis, i, j, 11, self.lis[i][j], combo_len)
                         break
                     
     def column_combo(self):
@@ -417,12 +622,12 @@ class Combo:
                             combo_len += 1
                             if i <= 0 and jadge_combo(self.lis[i][j], self.lis[i+5][j]):
                                 combo_len += 1
-                    if jadge_double(self.lis, i, j, 2, combo_len):
+                    if jadge_double(self.lis, i, j, 12, combo_len):
                         self.combo_count += 1
                         stack += combo_len-1
                         print("column", [i, j], combo_len)
                         self.combo_add()
-                        self.change(self.lis, i, j, 2, self.lis[i][j], combo_len)
+                        self.change(self.lis, i, j, 12, self.lis[i][j], combo_len)
                         
                         break
 
@@ -437,30 +642,95 @@ class Combo:
         #コンボ判定されたball_lstを0にする
         if ele >= 10:
             ele = ele - 10
+        
         if combo_type == 1:
+            for n in range(3):
+                for m in range(3):
+                    lis[i+n][j+m] = 10+ele
+
+        if combo_type == 11:
             for n in range(combo_len):
                 lis[i][j+n] = 10+ele
-        elif combo_type == 2:
+
+        elif combo_type == 12:
             for n in range(combo_len):
                 lis[i+n][j] = 10+ele
-        elif combo_type == 3:
+
+        elif combo_type == 21:
             for n in range(3):
                 lis[i][j+n] = 10+ele
             lis[i-1][j+1] = 10+ele
             lis[i+1][j+1] = 10+ele
-        elif combo_type == 4:
+
+        elif combo_type == 22:
             for n in range(3):
                 lis[i+1][j+n] = 10+ele
             lis[i][j] = 10+ele
             lis[i][j+2] = 10+ele
             lis[i+2][j] = 10+ele
             lis[i+2][j+2] = 10+ele
-        elif combo_type == 5:
+
+        elif combo_type == 23:
+                    for n in range(3):
+                        lis[i+n][j+1] = 10+ele
+                    lis[i][j] = 10+ele
+                    lis[i][j+2] = 10+ele
+                    lis[i+2][j] = 10+ele
+                    lis[i+2][j+2] = 10+ele
+
+        elif combo_type == 31:
             for n in range(3):
                 lis[i+n][j] = 10+ele
                 if n == 2:
-                    for m in range(3):
+                    for m in range(1, 3):
                         lis[i+n][j+m] = 10+ele
+        
+        elif combo_type == 32:
+            for n in range(3):
+                lis[i+n][j] = 10+ele
+                if n == 2:
+                    for m in range(-2, 0):
+                        lis[i+n][j+m] = 10+ele
+        
+        elif combo_type == 33:
+            for n in range(3):
+                lis[i+n][j] = 10+ele
+                lis[i][j+n] = 10+ele
+
+        elif combo_type == 34:
+            for n in range(3):
+                lis[i][j+n] = 10+ele
+                if n == 2:
+                    for m in range(1, 3):
+                        lis[i+m][j+n] = 10+ele
+        
+        elif combo_type == 41:
+            for n in range(3):
+                lis[i][j+n] = 10+ele
+                if n == 1:
+                    for m in range(1, 3):
+                        lis[i+n][j] = 10+ele
+
+        elif combo_type == 42:
+            for n in range(3):
+                lis[i+n][j] = 10+ele
+                if n == 2:
+                    for m in range(-1, 2, 2):
+                        lis[i+n][j+m] = 10+ele
+
+        elif combo_type == 43:
+            for n in range(3):
+                lis[i+n][j] = 10+ele
+                if n == 1:
+                    for m in range(1, 3):
+                        lis[i+n][j+m] = 10+ele
+
+        elif combo_type == 44:
+            for n in range(3):
+                lis[i][j+n] = 10+ele
+                if n == 2:
+                    for m in range(-1, 2, 2):
+                        lis[i+m][j+n] = 10+ele
 
         self.lis = lis
 
