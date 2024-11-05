@@ -597,8 +597,9 @@ def main():
                 status = "log:1"
             case "log:1":
                 for event in event_list:
-                    if event.key == pg.K_ESCAPE:
-                        status = "home:0"
+                    if event.type == pg.KEYDOWN:
+                        if event.key == pg.K_ESCAPE:
+                            status = "home:0"
                 
 
 
