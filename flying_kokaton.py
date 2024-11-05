@@ -469,6 +469,7 @@ class Combo:
     def reset(self):
         Combo.combo_all = 0
 
+
 # main関数
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
@@ -579,11 +580,13 @@ def main():
               
                 status = "game:1"
 
+            # case "log0":
+
+
         # 共通処理部
         pg.display.update()
         tmr += 1        
         clock.tick(200)
-        print(status)
 
 if __name__ == "__main__":
     pg.init()
