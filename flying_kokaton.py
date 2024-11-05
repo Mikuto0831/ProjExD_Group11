@@ -7,6 +7,7 @@ import pygame as pg
 from pygame.locals import *
 from module.name import Text, event_loop
 from random import randint as ran
+from random import uniform
 from typing import List
 
 
@@ -200,7 +201,7 @@ class Score:
     """
     スコア管理システム
     """
-    def __init__(self, session:ScoreLogDAO, player_name:str = "guest"):
+    def __init__(self, session:ScoreLogDAO, base_score:int = 1000, player_name:str = "guest"):
         """
         スコアをユーザと紐づけます
         担当 : c0a23019
@@ -213,6 +214,7 @@ class Score:
         self.value = 0
         self.player_name = player_name
         self.player_uuid = str(uuid.uuid1())
+        self.base_score = base_score
         # TODO: 遊んだ時間のlog取得
 
         # 表示系
@@ -239,8 +241,21 @@ class Score:
         """
         self.value += add_score
 
+    def calculate_combo_score(self, combo:int, bonus:float = 1.0):
+        """
+        コンボスコア計算
+        工夫点: ランダム性を持たせることで、ゲーム性を向上させる
+
+        :param int combo: 現在のコンボ数
+        :param float bonus: ボーナス倍率
+        """
+        combo_score = self.base_score * (combo ** 1.25) * (uniform(0.8, 1.2)) * bonus
+        self.add(round(combo_score))
+
     def save(self) -> None:
-        # TODO: クラス削除時にスコアをファイルに保存する
+        """
+        スコアをファイルに保存する
+        """
         self.session.insert(self.player_uuid, self.player_name, self.value)
 
 
