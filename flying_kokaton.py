@@ -4,6 +4,7 @@ import os
 import sys
 import uuid
 import pygame as pg
+import pygame
 from pygame.locals import *
 from module.name import Text, event_loop
 from random import randint as ran
@@ -193,6 +194,7 @@ class ScoreLogDAO:
         :rtype: tuple[str,str,str,str]
         """
         datas = row.rstrip("\n").rsplit(",")
+        datas[2] = int(datas[2])
 
         return tuple(datas)
 
@@ -477,9 +479,6 @@ def main():
     clock = pg.time.Clock()
 
     # 名前入力用のTextインスタンスを作成
-    font = pg.font.SysFont("yumincho", 30)
-    text = Text()  # Text クラスをインスタンス化
-    pg.key.start_text_input()  # テキスト入力を開始
 
     # 背景画像の読み込み
     bg_img = pg.image.load("./ex5/fig/pg_bg.jpg")
@@ -502,7 +501,7 @@ def main():
     tmr = 0 # 時間保存
 
     ball = pg.sprite.Group()
-    lis= PuzzleList()
+
     """
     status変数について
     本変数では画面・実行機能を選択する値を管理します。
@@ -524,18 +523,25 @@ def main():
         # 各statusに基づく処理部
         match status:
             case "home:0":
+                pg.key.start_text_input()  # テキスト入力を開始
+                font = pg.font.SysFont("yumincho", 30)
+                text = Text()  # Text クラスをインスタンス化
                 status = "home:1"
             case "home:1":
                 player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+                print(f"Player Name: {player_name}")
                 if not player_name:
                     player_name = None
-                print(f"Player Name: {player_name}")
-                status = "game:0"
+                elif player_name == "log":
+                    status = "log:1"
+                else:
+                    status = "game:0"
             
             case "game:0":
                 """
                 ゲームの初期化
                 """
+                lis= PuzzleList()
                 t = lis.get_lis()
                 for i in range(len(t)):
                     for j in range(len(t[i])):
@@ -579,8 +585,22 @@ def main():
                     lis= PuzzleList()      
               
                 status = "game:1"
+            
+            case "log:0":
+                lis = score_log_DAO.get()
+                screen.fill((255, 255, 255))
+                font = pygame.font.Font(None, 20)
+                sor = sorted(lis, reverse=True, key=lambda x: x[3])
+                # スコア表示
+                for i, row in enumerate(sor):
+                    screen.blit(font.render(str(row[1:]), True, (0,0,255)), (20, 50 + i*50))
+                status = "log:1"
+            case "log:1":
+                for event in event_list:
+                    if event.key == pg.K_ESCAPE:
+                        status = "home:0"
+                
 
-            # case "log0":
 
 
         # 共通処理部
