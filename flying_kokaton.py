@@ -376,23 +376,23 @@ def main():
                     ball.draw(screen)
 
                     lis= PuzzleList()       
-             case "game:2":
-              for event in event_list:
-                if event.type == pg.QUIT: return
+            case "game:2":
+                for event in event_list:
+                    if event.type == pg.QUIT: return
                     elif event.type == pg.KEYDOWN:
                         change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
                         if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
                             PuzzleList.lis[change_list_X][change_list_Y],PuzzleList.lis[drop_list_x][drop_list_y] = PuzzleList.lis[drop_list_x][drop_list_y],PuzzleList.lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
 
-              for i in range(len(t)):
-                  for j in range(len(t[i])):
-                      ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
-                  ball.update(screen)                               
-                  ball.draw(screen)
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                    ball.update(screen)                               
+                    ball.draw(screen)
 
-                  lis= PuzzleList()      
+                    lis= PuzzleList()      
               
-              status = "game:1"
+                status = "game:1"
 
         # 共通処理部
         pg.display.update()
