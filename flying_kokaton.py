@@ -533,7 +533,7 @@ def main():
                 if not player_name:
                     player_name = None
                 elif player_name == "log":
-                    status = "log:0"
+                    status = "log:1"
                 else:
                     status = "game:0"
             
@@ -597,9 +597,8 @@ def main():
                 status = "log:1"
             case "log:1":
                 for event in event_list:
-                    if event.type == pg.KEYDOWN:
-                        if event.key == pg.K_ESCAPE:
-                            status = "home:0"
+                    if event.key == pg.K_ESCAPE:
+                        status = "home:0"
                 
 
 
