@@ -7,6 +7,7 @@ import pygame as pg
 from pygame.locals import *
 from module.name import Text, event_loop
 from random import randint as ran
+from random import uniform
 from typing import List
 
 
@@ -178,7 +179,9 @@ class KoukatonDrop(pg.sprite.Sprite):
     )
     def __init__(self,ball_list: list[list],num: tuple):
         super().__init__()
-        self.kk_img = pg.image.load("ex5/fig/3.png")
+
+        self.kk_img = pg.image.load("./ex5/fig/3.png")
+
         self.kk_img = pg.transform.flip(self.kk_img, True, False)
         self.kk_img.fill((255,255,255,128),None, pg.BLEND_RGBA_MULT)
         self.image = pg.Surface((2*RAD, 2*RAD))
@@ -277,7 +280,7 @@ class Score:
     """
     スコア管理システム
     """
-    def __init__(self, session:ScoreLogDAO, player_name:str = "guest"):
+    def __init__(self, session:ScoreLogDAO, base_score:int = 1000, player_name:str = "guest"):
         """
         スコアをユーザと紐づけます
         担当 : c0a23019
@@ -290,6 +293,7 @@ class Score:
         self.value = 0
         self.player_name = player_name
         self.player_uuid = str(uuid.uuid1())
+        self.base_score = base_score
         # TODO: 遊んだ時間のlog取得
 
         # 表示系
@@ -316,8 +320,21 @@ class Score:
         """
         self.value += add_score
 
+    def calculate_combo_score(self, combo:int, bonus:float = 1.0):
+        """
+        コンボスコア計算
+        工夫点: ランダム性を持たせることで、ゲーム性を向上させる
+
+        :param int combo: 現在のコンボ数
+        :param float bonus: ボーナス倍率
+        """
+        combo_score = self.base_score * (combo ** 1.25) * (uniform(0.8, 1.2)) * bonus
+        self.add(round(combo_score))
+
     def save(self) -> None:
-        # TODO: クラス削除時にスコアをファイルに保存する
+        """
+        スコアをファイルに保存する
+        """
         self.session.insert(self.player_uuid, self.player_name, self.value)
 
 
@@ -737,26 +754,124 @@ class Combo:
     def reset(self):
         Combo.combo_all = 0
 
-# 実行確認用
-lis = [[1, 1, 1, 2, 4, 2], 
-       [2, 2, 2, 2, 2, 4], 
-       [3, 2, 2, 2, 2, 5], 
-       [4, 4, 2, 2, 2, 5], 
-       [3, 1, 2, 4, 4, 5], 
-       [3, 3, 3, 2, 4, 1]]
-# lis_m = PuzzleList()
-# lis = lis_m.get_lis()
-print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5], "\n")
-while True:
-    check = Combo(lis)
-    co = check.get_count()
-    if co <= 0:
-        break
-    lis = check.get_lis()
-    print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
-    print()
-    lis = drop_down(lis)
-    print()
-    print(lis[0], "\n", lis[1], "\n", lis[2], "\n", lis[3], "\n", lis[4], "\n", lis[5])
-    print("combo",Combo.get_combo(), "co", co)
-Combo.reset()
+# main関数
+def main():
+    pg.display.set_caption("はばたけ！こうかとん")
+    screen = pg.display.set_mode((WIDTH, HEIGHT))
+    clock = pg.time.Clock()
+
+    # 名前入力用のTextインスタンスを作成
+    font = pg.font.SysFont("yumincho", 30)
+    text = Text()  # Text クラスをインスタンス化
+    pg.key.start_text_input()  # テキスト入力を開始
+
+    # 背景画像の読み込み
+    bg_img = pg.image.load("./ex5/fig/pg_bg.jpg")
+    bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
+    
+    # キャラクター画像の読み込みと設定
+    kk_img = pg.image.load("./ex5/fig/3.png")
+    kk_img = pg.transform.flip(kk_img, True, False)
+
+    # キャラクターの初期座標設定
+    kk_rct = kk_img.get_rect()
+    kk_rct.center = 300,200
+    # ここまで
+    score_log_DAO = ScoreLogDAO()
+    drop_list_x = 0
+    drop_list_y = 0
+    change_list_X = 0
+    change_list_Y = 0
+    text = Text()
+    tmr = 0 # 時間保存
+
+    ball = pg.sprite.Group()
+    lis= PuzzleList()
+    """
+    status変数について
+    本変数では画面・実行機能を選択する値を管理します。
+    次の状態を代入してあげるだけで簡単に遷移を実現できます
+    以下の範囲に基づいて使用してください
+
+    例
+    ホーム画面に関する機能
+    status = "home:0"
+    """
+    status:str = "home:0"
+
+    while True:
+        # 共通処理部
+        event_list = pg.event.get()
+        for event in event_list:
+            if event.type == pg.QUIT: return
+
+        # 各statusに基づく処理部
+        match status:
+            case "home:0":
+                status = "home:1"
+            case "home:1":
+                player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+                if not player_name:
+                    player_name = None
+                print(f"Player Name: {player_name}")
+                status = "game:0"
+            
+            case "game:0":
+                """
+                ゲームの初期化
+                """
+                t = lis.get_lis()
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                status="game:1"
+
+            case "game:1":     
+                # 練習7
+                for i in range(4):
+                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
+                  
+                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+                
+                for event in event_list:
+                    if event.type == pg.QUIT: return
+                    elif event.type == pg.KEYDOWN:
+                        x, y = PuzzleList.move_lect([x, y], event.key)
+                        if event.key == pg.K_RETURN: # ENTERが押されたとき
+                                status = "game:2"
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                    ball.update(screen)                               
+                    ball.draw(screen)
+
+                    lis= PuzzleList()       
+            case "game:2":
+                for event in event_list:
+                    if event.type == pg.QUIT: return
+                    elif event.type == pg.KEYDOWN:
+                        change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
+                        if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
+                            PuzzleList.lis[change_list_X][change_list_Y],PuzzleList.lis[drop_list_x][drop_list_y] = PuzzleList.lis[drop_list_x][drop_list_y],PuzzleList.lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
+
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                    ball.update(screen)                               
+                    ball.draw(screen)
+
+                    lis= PuzzleList()      
+              
+                status = "game:1"
+
+        # 共通処理部
+        pg.display.update()
+        tmr += 1        
+        clock.tick(200)
+        print(status)
+
+if __name__ == "__main__":
+    pg.init()
+    main()
+    pg.quit()
+    sys.exit()
