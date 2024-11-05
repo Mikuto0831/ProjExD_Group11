@@ -5,7 +5,7 @@ import sys
 import uuid
 import pygame as pg
 from pygame.locals import *
-from module.kari import Text, event_loop
+from module.name import Text, event_loop
 from random import randint as ran
 from typing import List
 
