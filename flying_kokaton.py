@@ -1,17 +1,72 @@
+import numpy as np
 import datetime
 import os
-from random import randint as ran
 import sys
 import uuid
 import pygame as pg
+from pygame.locals import *
+from module.name import Text, event_loop
+from random import randint as ran
+from typing import List
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 定数宣言部
 HEIGHT = 650
 WIDTH = 450
+RAD =25#こうかとんボールの半径
+BALL_X=75#ボールのⅹ距離
+BALL_Y=75
+
+# 関数宣言部
+def elise(ball_lst: list,judge: list)-> list:
+    """
+    引数:ball_lst　ボールの色やなしを保持するリスト
+    引数:judge判定された
+    コンボ判定されたball_lstを0にする
+    judge =[[0,1],[0,2]]etc
+    """
+    for i in judge:
+        ball_lst[i[0]][i[1]] =0
+    return ball_lst
 
 # クラス宣言部
+class KoukatonDrop(pg.sprite.Sprite):
+    """
+    こうかとんに関するクラス
+    """
+    color=(
+        None,
+        (255,0,0),#赤
+        (0,0,255),#青
+        (0,255,0),#緑
+        (255,255,0),#黄
+        (136,72,152)#紫
+    )
+    def __init__(self,ball_list: list[list],num: tuple):
+        super().__init__()
+        self.kk_img = pg.image.load("fig/3.png")
+        self.kk_img = pg.transform.flip(self.kk_img, True, False)
+        self.kk_img.fill((255,255,255,128),None, pg.BLEND_RGBA_MULT)
+        self.image = pg.Surface((2*RAD, 2*RAD))
+        self.i=num[0]
+        self.j=num[1]
+        self.col =__class__.color[ball_list[self.i][self.j]]
+        self.image.set_alpha(128)
+        self.image.set_colorkey((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.center = self.i*BALL_X+12,self.j*BALL_Y+215
+                
+
+    
+    def update(self,screen:pg.surface):
+        screen.set_alpha(128)
+        screen.set_colorkey((0, 0, 0))
+        if self.col is not None:
+            # コンボして表示しない時を除いて表示する
+            pg.draw.circle(screen, self.col, (self.rect.centerx+RAD,self.rect.centery+RAD), RAD)
+            screen.blit(self.kk_img, [self.rect.centerx, self.rect.centery])
+        self.kill()
+
 class ScoreLogDAO:
     """
     それぞれのスコアデータの入出力を管理するクラス
@@ -131,6 +186,7 @@ class Score:
         # TODO: クラス削除時にスコアをファイルに保存する
         self.session.insert(self.player_uuid, self.player_name, self.value)
 
+# クラス宣言部
 class PuzzleList():
     """
     パズル画面を管理するリストに関係するクラス
@@ -138,8 +194,9 @@ class PuzzleList():
 
     def __init__(self):
         """
+        3つ以上繋げることがないようにする
         """
-        self.lis = [[ran(1,5) for d in range(6)] for n in range(6)]
+        self.lis=self.puzzle_generate(6,6)
     
     def get_lis(self):
         return self.lis
@@ -159,18 +216,92 @@ class PuzzleList():
             x -= 1 # xを-1する
         elif key == pg.K_RIGHT and x < 6: # 右矢印キーが押されたときかつxがフレーム内
             x += 1 # xを+1する
-        return x, y # xとyを返す
+        return x, y # xとyを返す        
+
+    def puzzle_generate(self,rows:int, cols:int)->np.ndarray:
+        array = np.array([[0] * cols for _ in range(rows)])  # 初期化
+
+        for i in range(rows):
+            for j in range(cols):
+                while True:
+                    num = np.random.randint(1, 6)  # 1から5の間のランダムな数
+                    # 同じ行または列に3つ連続していないかを確認
+                    if (j < 2 or array[i][j-1] != num or array[i][j-2] != num) and \
+                    (i < 2 or array[i-1][j] != num or array[i-2][j] != num):
+                        array[i][j] = num
+                        break
+
+        return array                        
+
+    def get_lis(self):
+        return self.lis
     
+class Score:
+    """
+    スコア管理システム
+    """
+    def __init__(self, player_name:str = "guest"):
+        """
+        スコアをユーザと紐づけます
+        担当 : c0a23019
+        
+        :param str player_name: プレイヤー名
+        """
+        # スコア情報系
+        self.value = 0
+        self.player_name = player_name
+        self.player_uuid = uuid.uuid1()
+        # TODO: 遊んだ時間のlog取得
+        
+        # 表示系
+        self.font = pg.font.Font(None, 50)
+        self.color = (0, 0, 255)
+        self.image = self.font.render(f"Score: {self.value}", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = 100, 100
+
+    def update(self, screen: pg.Surface):
+        """
+        スコア表示
+
+        :param Surface screen: スクリーン情報
+        """
+        self.image = self.font.render(f"Score: {self.value}", 0, self.color)
+        screen.blit(self.image, self.rect)
+
+    def add(self, add_score:int):
+        """
+        スコア加算
+
+        :param int add_score: 加算したい値
+        """
+        self.value += add_score
+
+    def save(self) -> None:
+        # TODO: クラス削除時にスコアをファイルに保存する
+        self.session.insert(self.player_uuid, self.player_name, self.value)
+
+
+# main関数
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    clock  = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg.jpg")
+    clock = pg.time.Clock()
+
+    # 名前入力用のTextインスタンスを作成
+    font = pg.font.SysFont("yumincho", 30)
+    text = Text()  # Text クラスをインスタンス化
+    pg.key.start_text_input()  # テキスト入力を開始
+
+    # 背景画像の読み込み
+    bg_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\pg_bg.jpg")
     bg_imgs = [bg_img, pg.transform.flip(bg_img, True, False)]
-    # ここから 練習2
-    kk_img = pg.image.load("fig/3.png")
+    
+    # キャラクター画像の読み込みと設定
+    kk_img = pg.image.load("C:\\Users\\Admin\\Documents\\ProjExD\\ex5\\fig\\3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
-    # ここから 練習8-1 rectの初期座標設定
+
+    # キャラクターの初期座標設定
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300,200
     # ここまで
@@ -179,8 +310,11 @@ def main():
     drop_list_y = 0
     change_list_X = 0
     change_list_Y = 0
+    text = Text()
     tmr = 0 # 時間保存
 
+    ball = pg.sprite.Group()
+    lis= PuzzleList()
     """
     status変数について
     本変数では画面・実行機能を選択する値を管理します。
@@ -194,57 +328,77 @@ def main():
     status = "home:0"
     """
     status:str = "home:0"
-    # ここまで
 
     while True:
         # 共通処理部
-        
+        event_list = pg.event.get()
+        for event in event_list:
+            if event.type == pg.QUIT: return
+
         # 各statusに基づく処理部
         match status:
             case "home:0":
-                for event in pg.event.get():
-                    # キーが押されたらゲーム画面へ
-                    if event.type == pg.KEYDOWN:
-                        status = "game:0"
-                        break
-            case "game:0":   
-                if event.type == pg.KEYDOWN:
-                    status = "game:1"     
-        
-            case "game:1":
-                status = "game:2"
-                for event in pg.event.get():
+                status = "home:1"
+            case "home:1":
+                player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
+                if not player_name:
+                    player_name = None
+                print(f"Player Name: {player_name}")
+                status = "game:0"
+            
+            case "game:0":
+                """
+                ゲームの初期化
+                """
+                t = lis.get_lis()
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                status="game:1"
+
+            case "game:1":     
+                # 練習7
+                for i in range(4):
+                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
+                  
+                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+                
+                for event in event_list:
                     if event.type == pg.QUIT: return
                     elif event.type == pg.KEYDOWN:
                         x, y = PuzzleList.move_lect([x, y], event.key)
                         if event.key == pg.K_RETURN: # ENTERが押されたとき
                                 status = "game:2"
-            case "game:2":
-                for event in pg.event.get():
-                    if event.type == pg.QUIT: return
+                for i in range(len(t)):
+                    for j in range(len(t[i])):
+                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                    ball.update(screen)                               
+                    ball.draw(screen)
+
+                    lis= PuzzleList()       
+             case "game:2":
+              for event in event_list:
+                if event.type == pg.QUIT: return
                     elif event.type == pg.KEYDOWN:
                         change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
                         if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
                             PuzzleList.lis[change_list_X][change_list_Y],PuzzleList.lis[drop_list_x][drop_list_y] = PuzzleList.lis[drop_list_x][drop_list_y],PuzzleList.lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
-               
-                
-                
 
+              for i in range(len(t)):
+                  for j in range(len(t[i])):
+                      ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                  ball.update(screen)                               
+                  ball.draw(screen)
 
-                # 練習7
-                for i in range(4):
-                    screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
-                
-                screen.blit(kk_img, kk_rct)
-
-                
+                  lis= PuzzleList()      
+              
+              status = "game:1"
 
         # 共通処理部
-        
         pg.display.update()
         tmr += 1        
         clock.tick(200)
-
+        print(status)
 
 if __name__ == "__main__":
     pg.init()
