@@ -844,7 +844,7 @@ def main():
                 if not player_name:
                     player_name = None
                 elif player_name == "log":
-                    status = "log:1"
+                    status = "log:0"
                 else:
                     status = "game:0"
             
@@ -910,6 +910,11 @@ def main():
             case "log:0":
                 lis = score_log_DAO.get()
                 screen.fill((255, 255, 255))
+                rnk_img = pg.image.load("./ex5/fig/731681.png")
+                rnk_img = pg.transform.flip(rnk_img, True, False)
+                rnk_rct = kk_img.get_rect()
+                rnk_rct.center = 200, 200
+                screen.blit(rnk_img, rnk_rct)
                 font = pygame.font.Font(None, 20)
                 sor = sorted(lis, reverse=True, key=lambda x: x[3])
                 # スコア表示
