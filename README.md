@@ -7,11 +7,23 @@
 
 ## ゲームの概要
 * パズルをそろえてこうかとんを倒すゲーム
-* 参考URL:[パズドラ https://pad.gungho.jp/member/]
+* 参考URL:[パズドラ https://pad.gungho.jp/member/](https://pad.gungho.jp/member/)
+### ゲームタイトル
+![image](https://github.com/user-attachments/assets/4672fcca-79f9-4d19-9e42-9b5d62aaa642)
+### パズル画面
+![image](https://github.com/user-attachments/assets/22ff6cd2-028e-42b2-8b26-72bc10c11f5c)
 
 ## ゲームの遊び方
-* 同じ種類の球を3つ以上そろえる
-* コンボをつなげる
+### 名前を入力しよう
+- 入力しなければGuestになります
+- `log`という名前で始めるとゲームのログ(ランキング)が表示されます
+### ゲームで遊ぼう
+- 球を1つEnterで選択する
+- 矢印キーで操作する
+- Enter又は時間切れで位置を確定！
+- 同じ種類の球を3つ以上そろえる
+- コンボをつなげる
+- scoreを伸ばす
 ## ゲームの実装
 ### 共通基本機能
 * ホーム画面
@@ -31,7 +43,7 @@
 
 ### ToDo: やること
 - [ ] サウンド系
-- [ ] 特殊型での判定
+- [x] 特殊型での判定
 
 ### メモ
 * 連絡に関しては各自Google チャットを見ること
