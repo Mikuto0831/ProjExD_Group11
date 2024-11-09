@@ -837,7 +837,7 @@ def main():
                 pg.key.start_text_input()  # テキスト入力を開始
                 font = pg.font.SysFont("yumincho", 30)
                 text = Text()  # Text クラスをインスタンス化
-                status = "home:1"
+                status = "log:0"
             case "home:1":
                 player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
                 print(f"Player Name: {player_name}")
@@ -910,10 +910,14 @@ def main():
             case "log:0":
                 lis = score_log_DAO.get()
                 screen.fill((255, 255, 255))
-                rnk_img = pg.image.load("./ex5/fig/731681.png")
-                rnk_img = pg.transform.flip(rnk_img, True, False)
+                rnk_img = pg.image.load("./ex5/fig/1278942.png")
                 rnk_rct = kk_img.get_rect()
                 rnk_rct.center = 200, 200
+
+                font1 = pygame.font.SysFont("hg正楷書体pro", 35)
+                text1 = font1.render("！スコアランキング！", True, (255,0,255))
+                screen.blit(text1, (50,70))
+
                 screen.blit(rnk_img, rnk_rct)
                 font = pygame.font.Font(None, 20)
                 sor = sorted(lis, reverse=True, key=lambda x: x[3])
