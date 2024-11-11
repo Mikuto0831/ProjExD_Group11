@@ -398,7 +398,7 @@ class PuzzleList():
         elif key == pg.K_LEFT and x > 0: # 左矢印キーが押されたときかつxがフレーム内
             x -= 1 # xを-1する
             if x < 0:
-                y = 0
+                x = 0
         elif key == pg.K_RIGHT and x < 6: # 右矢印キーが押されたときかつxがフレーム内
             x += 1 # xを+1する
             if x >5:
