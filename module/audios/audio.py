@@ -15,6 +15,7 @@ class Audio:
             self.key_push = pygame.mixer.Sound('./ex5/audio/key_push.mp3')
 
             self.combos = [pygame.mixer.Sound(f'./ex5/audio/combo/{i}.mp3') for i in range(1, 16)]
+            self.combo_count = 0
 
             # BGM
             self.bgm = pygame.mixer.Sound('./ex5/audio/パズドラ風.mp3')
@@ -62,14 +63,20 @@ class Audio:
         self.key_push.play()
 
     @sound_deco
-    def combo_play(self, combo:int):
+    def combo_play(self):
         """
         コンボ音
         (コンボ数によって音が変わる)
         """
-        if combo >= 15:
-            combo = 15
-        self.combos[combo-1].play()
+        self.combos[self.combo_count].play()
+        if self.combo_count < 14:
+            self.combo_count += 1
+
+    def reset_combo(self):
+        """
+        コンボ数リセット
+        """
+        self.combo_count = 0
 
     # BGM
     @sound_deco

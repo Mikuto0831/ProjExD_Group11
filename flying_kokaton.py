@@ -232,9 +232,6 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300,200
     # ここまで
-    Combo.set_score(score)
-    Combo.set_screen(screen)
-    show_combo = ComboLog()
     drop_list_x = 0
     drop_list_y = 0
     change_list_X = 0
@@ -247,6 +244,12 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
     ball = pg.sprite.Group()
 
     audio: Audio = Audio()
+    
+    Combo.set_score(score)
+    Combo.set_screen(screen)
+    Combo.set_audio(audio)
+    show_combo = ComboLog()
+
     text:Text
     player_name = None
 
@@ -358,6 +361,7 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
                 check = Combo(lis)
                 co = check.get_count()
                 if co <= 0:
+                    Combo.reset_audio_combo()
                     status="game:1"
                 check = check.get_lis()
                 check = drop_down(check)
@@ -370,6 +374,7 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
                 score.update(screen)
                 show_combo.update(screen)
                 
+
             
             case "log:0":
                 lis = score_log_DAO.get()

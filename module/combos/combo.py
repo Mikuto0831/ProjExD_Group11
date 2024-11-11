@@ -1,5 +1,6 @@
 import pygame as pg
 from module.scores.scores import Score
+from module.audios.audio import Audio
 
 def jadge_combo(a, b):
     if a == b or a + 10 == b or a == b + 10:
@@ -470,6 +471,7 @@ class Combo:
         import time
         cls.combo_all += 1
         cls.score.calculate_combo_score(cls.combo_all)
+        cls.audio.combo_play()
         cls.uppdate_screen()
         time.sleep(0.5)
 
@@ -500,6 +502,24 @@ class Combo:
         """
         cls.score = score
     
+    @classmethod
+    def set_audio(cls, audio:Audio):
+        """
+        audioをセットする
+        担当: C0A23019
+
+        :param Audio audio: オーディオクラス
+        """
+        cls.audio = audio
+    
+    @classmethod
+    def reset_audio_combo(cls):
+        """
+        オーディオのコンボをリセットする
+        担当: C0A23019
+        """
+        cls.audio.reset_combo()
+
     @classmethod
     def set_screen(cls, screen:pg.surface):
         """
