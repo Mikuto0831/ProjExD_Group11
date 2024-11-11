@@ -372,19 +372,52 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
                 
             
             case "log:0":
-                lis_log = score_log_DAO.get()
-                screen.fill((255, 255, 255))
-                font = pygame.font.Font(None, 20)
-                sor = sorted(lis_log, reverse=True, key=lambda x: x[3])
+                lis = score_log_DAO.get()
+                bg_img = pg.image.load("./ex5/fig/654390.jpg")
+                bg_rct = bg_img.get_rect()
+                screen.blit(bg_img, bg_rct)
+
+                rnk1_img = pg.image.load("./ex5/fig/1278942.png")
+                rnk1_rct = kk_img.get_rect()
+                rnk1_rct.center = 75, 150
+
+                rnk2_img = pg.image.load("./ex5/fig/1278943.png")
+                rnk2_rct = kk_img.get_rect()
+                rnk2_rct.center = 75, 250
+
+                rnk3_img = pg.image.load("./ex5/fig/1278944.png")
+                rnk3_rct = kk_img.get_rect()
+                rnk3_rct.center = 75, 350
+
+                font1 = pygame.font.SysFont("hg正楷書体pro", 35)
+                text1 = font1.render("スコアランキング", True, (0,0,255))
+                screen.blit(text1, (100,70))
+
+                font2 = pygame.font.SysFont("hg正楷書体pro", 25)
+                text2 = font2.render("ESCを押してスタート画面へ", True, (255,0,255))
+                screen.blit(text2, (60,500))
+
+                screen.blit(rnk1_img, rnk1_rct)
+                screen.blit(rnk2_img, rnk2_rct)
+                screen.blit(rnk3_img, rnk3_rct)
+                name_font = pygame.font.Font(None, 60)
+                point_font = pygame.font.Font(None, 40)
+                date_font = pygame.font.Font(None, 30)
+                sor = sorted(lis, reverse=True, key=lambda x: x[3])
+
                 # スコア表示
                 for i, row in enumerate(sor):
-                    screen.blit(font.render(str(row[1:]), True, (0,0,255)), (20, 50 + i*50))
+                    screen.blit(name_font.render(f"{row[1]}", True, (0,255,0)), (180, 170 + i*100))
+                    screen.blit(point_font.render(f"{row[2]}", True, (0,0,255)), (300, 180 + i*100))
+                    screen.blit(date_font.render(f"{row[3]}", True, (255,0,0)), (180, 220 + i*100))
+                    if i >= 3:
+                        break
                 status = "log:1"
             case "log:1":
                 for event in event_list:
                     if event.type == pg.KEYDOWN:
                         status = "home:0"
-
+        
         # 共通処理部
         pg.display.update()
         tmr += 1        
