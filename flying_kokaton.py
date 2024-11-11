@@ -19,18 +19,15 @@ BALL_X=75#ボールのⅹ距離
 BALL_Y=75
 
 # 関数宣言部
-def elise(ball_lst: list,judge: list)-> list:
-    """
-    引数:ball_lst　ボールの色やなしを保持するリスト
-    引数:judge判定された
-    コンボ判定されたball_lstを0にする
-    judge =[[0,1],[0,2]]etc
-    """
-    for i in judge:
-        ball_lst[i[0]][i[1]] =0
-    return ball_lst
 
 def drop_down(lis:list[list])->list[list]:
+    """
+    ドロップを生成して上から落とし、盤面を埋める
+    引数:
+    list[list]
+    返り値:
+    list[list]
+    """
     check = True
     while check:
         for j in range(6):
@@ -51,13 +48,25 @@ def drop_down(lis:list[list])->list[list]:
     return lis
 
 
-def jadge_combo(a, b):
+def jadge_combo(a:int, b:int):
+    """
+    aとbが同じ属性か判断する
+    """
     if a == b or a + 10 == b or a == b + 10:
         return True
     else:
         return False
 
 def jadge_double(lis:list[list], i:int, j:int, combo_type:int, combo_len:int = 3):
+    """
+    コンボが成立しているか判定する
+    引数:
+    list[list]:盤面のリスト,
+    int:Y座標,
+    int:X座標,
+    int:コンボタイプ,
+    int:コンボに使われるドロップ数 初期値３
+    """
     T = combo_len
     if combo_type == 1:
         for n in range(3):
@@ -344,7 +353,7 @@ class PuzzleList():
     パズル画面を管理するリストに関係するクラス
     担当:瀬尾
     get_lis():生成した盤面を取得する
-    selt_lis(list[list]):盤面をlist[list]に置き換える
+    set_lis(list[list]):盤面をlist[list]に置き換える
     """
 
     def __init__(self):
@@ -356,16 +365,23 @@ class PuzzleList():
         self.lis=self.puzzle_generate(6,6)
     
     def get_lis(self):
+        """
+        リストを返す
+        """
         return self.lis
     
     def set_lis(self, lis:list[list]):
+        """
+        リストを設定する
+        引数:list[list]
+        """
         self.lis = lis
 
     def move_lect(pos:list, key)-> int:
         """
         引数1: 現在の位置 (x, y) または (X, Y) を含むリスト
         引数2: イベントキー（pg.K_UP, pg.K_DOWN, pg.K_LEFT, pg.K_RIGHT）
-        返り値：int型のxとy
+        返り値:int型のxとy
         """
         x, y = pos # xとyを引数posとする
         if key == pg.K_UP and y > 0: # 上矢印キーが押されたときかつyがフレーム内
@@ -404,6 +420,10 @@ class Combo:
     combo_all = 0
 
     def __init__(self, lis:list[list]):
+        """
+        コンボの判定を行う
+        引数:list[list] 盤面の配列
+        """
         self.combo_count = 0
         self.lis = lis
         check = 0
@@ -425,11 +445,14 @@ class Combo:
             if check == self.combo_count:
                 break
             check = self.combo_count
-        print("rep")
         print(self.lis[0], "\n", self.lis[1], "\n", self.lis[2], "\n", self.lis[3], "\n", self.lis[4], "\n", self.lis[5])
         self.elise(self.lis)
     
     def box_combo(self):
+        """
+        箱型(3×3)のコンボの判定
+        コンボタイプ:1
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -443,6 +466,8 @@ class Combo:
                     break
 
     def h_combo(self):
+        """
+        H型のコンボの判定"""
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -456,6 +481,9 @@ class Combo:
                     break
         
     def i_combo(self):
+        """
+        I型のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -469,6 +497,9 @@ class Combo:
                     break
 
     def t_combo(self):
+        """
+        Ｔ型のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -482,6 +513,9 @@ class Combo:
                     break
     
     def t_combo_rev(self):
+        """
+        Ｔ型(逆転)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -495,6 +529,9 @@ class Combo:
                     break
 
     def t_left_combo(self):
+        """
+        Ｔ型(左倒し)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -508,6 +545,9 @@ class Combo:
                     break
     
     def t_right_combo(self):
+        """
+        T型(右倒し)のコンボの判定
+        """
         for i in range(1, len(self.lis) - 1):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -521,6 +561,9 @@ class Combo:
                     break
     
     def l_combo_dl(self):
+        """
+        Ｌ字型(四角の左下)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -534,6 +577,8 @@ class Combo:
                     break
 
     def l_combo_dr(self):
+        """
+        Ｌ字型(四角の右下)のコンボの判定"""
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(2, len(self.lis)):
@@ -546,6 +591,9 @@ class Combo:
                     self.change(self.lis, i, j, 32, self.lis[i][j])
                     break
     def l_combo_ul(self):
+        """
+        L字型(四角の左上)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -558,6 +606,9 @@ class Combo:
                     self.change(self.lis, i, j, 31, self.lis[i][j])
                     break
     def l_combo_ur(self):
+        """
+        L字型(四角の右上)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -571,6 +622,9 @@ class Combo:
                     break
     
     def cross_combo(self):
+        """
+        十字型(3×3)のコンボの判定
+        """
         for i in range(1, len(self.lis) - 1):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -585,6 +639,9 @@ class Combo:
                     break
 
     def row_combo(self):
+       """
+       横一列のコンボの判定
+       """
        for i in range(len(self.lis)):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -608,6 +665,9 @@ class Combo:
                         break
                     
     def column_combo(self):
+        """
+        縦一列のコンボの判定
+        """
         for j in range(len(self.lis)):
             stack = 0
             for i in range(len(self.lis) - 2):
@@ -628,18 +688,31 @@ class Combo:
                         print("column", [i, j], combo_len)
                         self.combo_add()
                         self.change(self.lis, i, j, 12, self.lis[i][j], combo_len)
-                        
                         break
 
     def get_count(self):
+        """
+        コンボ数を返す
+        """
         return self.combo_count
     
     def get_lis(self):
+        """
+        リストを返す
+        """
         return self.lis
     
-    def change(self, lis:list[list], i:int, j:int, combo_type:int, ele:int = 0, combo_len:int = 1):
-        #引数:lst　ボールの種類を保持するリスト
-        #コンボ判定されたball_lstを0にする
+    def change(self, lis:list[list], i:int, j:int, combo_type:int, ele:int, combo_len:int = 1):
+        """
+        コンボに使われた配列の数字に10を足す
+        引数:
+        lis:盤面に使う配列,
+        i:Y座標,
+        j:X座標,
+        combo_type:コンボの種類     1:box 11:row 12:column 21:cross 22:H 23:I 31:L-dl 32:L-dr 33:L-ul 34:L-ur 41:T 42:T-rev 43:T-l 44:T-r,
+        ele:コンボしたドロップの属性,
+        combo_len:コンボに使われたドロップの数 初期値1
+        """
         if ele >= 10:
             ele = ele - 10
         
@@ -736,6 +809,11 @@ class Combo:
 
     
     def elise(self, lis:list[list]):
+        """
+        一度以上コンボに使われたマスの数字を0にする(10以上の数を0にする)
+        引数:
+        lis:盤面のリスト
+        """
         for i in range(len(lis)):
             for j in range(len(lis[i])):
                 if lis[i][j] >= 10:
@@ -744,14 +822,25 @@ class Combo:
     
     @classmethod
     def combo_add(self):
+        """
+        クラスメソッド
+        コンボ数を1増やす
+        """
         Combo.combo_all += 1
         
     @classmethod
     def get_combo(self):
+        """
+        クラスメソッド
+        コンボ数を取得する
+        """
         return Combo.combo_all
     
     @classmethod
     def reset(self):
+        """
+        コンボ数を0にする
+        """
         Combo.combo_all = 0
 
 # main関数
@@ -868,7 +957,6 @@ def main():
         pg.display.update()
         tmr += 1        
         clock.tick(200)
-        print(status)
 
 if __name__ == "__main__":
     pg.init()
