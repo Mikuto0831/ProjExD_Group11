@@ -105,9 +105,9 @@ class Time_circulate():
         self.past_time=past_time
     def update(self,tmr,screen):
         if self.mode==0:
-            txt = self.font.render(f"Operatinon time is 7second",True,(0,0,0))
+            txt = self.font.render(f"Operatinon time is 8second",True,(0,0,0))
         else:
-            txt = self.font.render(f"Operatinon limit {7-(tmr-self.past_time)//60}second",True,(0,0,0))
+            txt = self.font.render(f"Operatinon limit {8-(tmr-self.past_time)//60}second",True,(0,0,0))
         screen.blit(txt,[0,100])
 
 class PuzzleList():
