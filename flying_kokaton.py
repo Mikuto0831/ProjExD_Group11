@@ -903,7 +903,7 @@ def main():
                                 check = drop_down(check)
                                 status="game:1"
                                 Combo.reset()
-                                lis.set_lis(check)
+                                lis_m.set_lis(check)
                 if tmr-tmrs.past_time>=TIMES:
                     while True:
                         check = Combo(lis)
