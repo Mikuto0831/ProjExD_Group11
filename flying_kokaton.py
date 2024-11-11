@@ -955,33 +955,11 @@ def main():
                             drop_list_x,drop_list_y = change_list_X,change_list_Y
                             print(lis)
                         if event.key == pg.K_RETURN: # ENTERが押されたとき
-                            while True:
-                                check = Combo(lis)
-                                co = check.get_count()
-                                if co <= 0:
-                                    status="game:1"
-                                    break
-                                check = check.get_lis()
-                                check = drop_down(check)
-                                status="game:1"
-                                show_combo.add_combo(Combo.get_combo())
-                                Combo.reset()
-                                lis_m.set_lis(check)
+                            status = "game:3"
+                            
                 if tmr-tmrs.past_time>=TIMES:
-                    while True:
-                        check = Combo(lis)
-                        co = check.get_count()
-                        if co <= 0:
-                            status="game:1"
-                            break
-                        check = check.get_lis()
-                        check = drop_down(check)
-                        status="game:1"
-                        show_combo.add_combo(Combo.get_combo())
-                        Combo.reset()
-                        lis_m.set_lis(check)
-                        print(check)
-                    
+                    status = "game:3"
+
                 for i in range(4):
                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                 for i in range(len(lis)):
@@ -993,6 +971,23 @@ def main():
                 tmrs.update(tmr,screen)
                 score.update(screen)
                 show_combo.update(screen)
+
+            case "game:3":
+                check = Combo(lis)
+                co = check.get_count()
+                if co <= 0:
+                    status="game:1"
+                check = check.get_lis()
+                check = drop_down(check)
+                show_combo.add_combo(Combo.get_combo())
+                Combo.reset()
+                lis_m.set_lis(check)
+                print(check)
+                screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
+                tmrs.update(tmr,screen)
+                score.update(screen)
+                show_combo.update(screen)
+                
             
             case "log:0":
                 lis_log = score_log_DAO.get()
