@@ -810,7 +810,9 @@ def main():
     text = Text()
     tmr = 0 # 時間保存
     tmrs=Time_circulate(tmr)
-
+    lis_m = PuzzleList()
+    lis = lis_m.get_lis()
+    
     ball = pg.sprite.Group()
 
     """
@@ -844,7 +846,7 @@ def main():
                 if not player_name:
                     player_name = None
                 elif player_name == "log":
-                    status = "log:1"
+                    status = "log:0"
                 else:
                     status = "game:0"
             
@@ -852,11 +854,9 @@ def main():
                 """
                 ゲームの初期化
                 """
-                lis= PuzzleList()
-                t = lis.get_lis()
-                for i in range(len(t)):
-                    for j in range(len(t[i])):
-                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                for i in range(len(lis)):
+                    for j in range(len(lis[i])):
+                        ball.add(KoukatonDrop(lis,(i,j)))
                 status="game:1"
 
             case "game:1":     
@@ -873,9 +873,9 @@ def main():
                         if event.key == pg.K_RETURN: # ENTERが押されたとき
                                 status = "game:2"
                                 tmrs.settime(tmr)
-                for i in range(len(t)):
-                    for j in range(len(t[i])):
-                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                for i in range(len(lis)):
+                    for j in range(len(lis[i])):
+                        ball.add(KoukatonDrop(lis,(i,j)))
                     ball.update(screen)                               
                     ball.draw(screen)
                 screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
@@ -889,36 +889,57 @@ def main():
                         change_list_X,change_list_Y=drop_list_x,drop_list_y
                         change_list_X,change_list_Y = PuzzleList.move_lect([change_list_X, change_list_Y], event.key)
                         if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
-                            lis.get_lis()[change_list_X][change_list_Y],lis.get_lis()[drop_list_x][drop_list_y] = lis.get_lis()[drop_list_x][drop_list_y],lis.get_lis()[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
+                            lis[change_list_X][change_list_Y],lis[drop_list_x][drop_list_y] = lis[drop_list_x][drop_list_y],lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
                             drop_list_x,drop_list_y = change_list_X,change_list_Y
-                            print(lis.get_lis())
+                            print(lis)
                         if event.key == pg.K_RETURN: # ENTERが押されたとき
-                            status = "game:1"
-                print(tmr-tmrs.past_time)
+                            while True:
+                                check = Combo(lis)
+                                co = check.get_count()
+                                if co <= 0:
+                                    status="game:1"
+                                    break
+                                check = check.get_lis()
+                                check = drop_down(check)
+                                status="game:1"
+                                Combo.reset()
+                                lis.set_lis(check)
                 if tmr-tmrs.past_time>=TIMES:
-                    status="game:1"
+                    while True:
+                        check = Combo(lis)
+                        co = check.get_count()
+                        if co <= 0:
+                            status="game:1"
+                            break
+                        check = check.get_lis()
+                        check = drop_down(check)
+                        status="game:1"
+                        Combo.reset()
+                        lis_m.set_lis(check)
+                        print(check)
+                    
                 for i in range(4):
                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
-                for i in range(len(t)):
-                    for j in range(len(t[i])):
-                        ball.add(KoukatonDrop(lis.get_lis(),(i,j)))
+                for i in range(len(lis)):
+                    for j in range(len(lis[i])):
+                        ball.add(KoukatonDrop(lis,(i,j)))
                     ball.update(screen)                               
                     ball.draw(screen)
                 screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
                 tmrs.update(tmr,screen)
             
             case "log:0":
-                lis = score_log_DAO.get()
+                lis_log = score_log_DAO.get()
                 screen.fill((255, 255, 255))
                 font = pygame.font.Font(None, 20)
-                sor = sorted(lis, reverse=True, key=lambda x: x[3])
+                sor = sorted(lis_log, reverse=True, key=lambda x: x[3])
                 # スコア表示
                 for i, row in enumerate(sor):
                     screen.blit(font.render(str(row[1:]), True, (0,0,255)), (20, 50 + i*50))
                 status = "log:1"
             case "log:1":
                 for event in event_list:
-                    if event.key == pg.K_ESCAPE:
+                    if event.type == pg.KEYDOWN:
                         status = "home:0"
 
         # 共通処理部
