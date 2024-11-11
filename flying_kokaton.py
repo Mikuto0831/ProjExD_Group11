@@ -196,7 +196,7 @@ class ComboLog:
 
 
 # main関数
-def main():
+def main(score_log_DAO:ScoreLogDAO, score:Score):
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
@@ -215,8 +215,6 @@ def main():
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300,200
     # ここまで
-    score_log_DAO = ScoreLogDAO()
-    score = Score(score_log_DAO)
     Combo.set_score(score)
     Combo.set_screen(screen)
     show_combo = ComboLog()
@@ -231,6 +229,8 @@ def main():
     lis = lis_m.get_lis()
     
     ball = pg.sprite.Group()
+
+    player_name = None
 
     """
     status変数について
@@ -274,13 +274,15 @@ def main():
                 for i in range(len(lis)):
                     for j in range(len(lis[i])):
                         ball.add(KoukatonDrop(lis,(i,j)))
+
+                score.set_player_name(player_name)
                 status="game:1"
 
             case "game:1":                    
                 for i in range(4):
                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                   
-                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+                # key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
                 
                 for event in event_list:
                     if event.type == pg.QUIT: return
@@ -368,6 +370,11 @@ def main():
 
 if __name__ == "__main__":
     pg.init()
-    main()
+    score_log_DAO = ScoreLogDAO()
+    score = Score(score_log_DAO)
+    try:
+        main(score_log_DAO, score)
+    finally:
+        score.save()
     pg.quit()
     sys.exit()
