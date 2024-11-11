@@ -837,7 +837,7 @@ def main():
                 pg.key.start_text_input()  # テキスト入力を開始
                 font = pg.font.SysFont("yumincho", 30)
                 text = Text()  # Text クラスをインスタンス化
-                status = "home:1"
+                status = "log:0"
             case "home:1":
                 player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
                 print(f"Player Name: {player_name}")
@@ -909,44 +909,21 @@ def main():
             
             case "log:0":
                 lis = score_log_DAO.get()
-                bg_img = pg.image.load("./ex5/fig/654390.jpg")
-                bg_rct = bg_img.get_rect()
-                screen.blit(bg_img, bg_rct)
-
-                rnk1_img = pg.image.load("./ex5/fig/1278942.png")
-                rnk1_rct = kk_img.get_rect()
-                rnk1_rct.center = 75, 150
-
-                rnk2_img = pg.image.load("./ex5/fig/1278943.png")
-                rnk2_rct = kk_img.get_rect()
-                rnk2_rct.center = 75, 250
-
-                rnk3_img = pg.image.load("./ex5/fig/1278944.png")
-                rnk3_rct = kk_img.get_rect()
-                rnk3_rct.center = 75, 350
+                screen.fill((255, 255, 255))
+                rnk_img = pg.image.load("./ex5/fig/1278942.png")
+                rnk_rct = kk_img.get_rect()
+                rnk_rct.center = 200, 200
 
                 font1 = pygame.font.SysFont("hg正楷書体pro", 35)
-                text1 = font1.render("スコアランキング", True, (0,0,255))
-                screen.blit(text1, (100,70))
+                text1 = font1.render("！スコアランキング！", True, (255,0,255))
+                screen.blit(text1, (50,70))
 
-                font2 = pygame.font.SysFont("hg正楷書体pro", 25)
-                text2 = font2.render("ESCを押してスタート画面へ", True, (255,0,255))
-                screen.blit(text2, (60,500))
-
-                screen.blit(rnk1_img, rnk1_rct)
-                screen.blit(rnk2_img, rnk2_rct)
-                screen.blit(rnk3_img, rnk3_rct)
-                name_font = pygame.font.Font(None, 60)
-                point_font = pygame.font.Font(None, 40)
-                date_font = pygame.font.Font(None, 30)
+                screen.blit(rnk_img, rnk_rct)
+                font = pygame.font.Font(None, 20)
                 sor = sorted(lis, reverse=True, key=lambda x: x[3])
                 # スコア表示
                 for i, row in enumerate(sor):
-                    screen.blit(name_font.render(f"{row[1]}", True, (0,255,0)), (180, 170 + i*100))
-                    screen.blit(point_font.render(f"{row[2]}", True, (0,0,255)), (300, 180 + i*100))
-                    screen.blit(date_font.render(f"{row[3]}", True, (255,0,0)), (180, 220 + i*100))
-                    if i >= 3:
-                        break
+                    screen.blit(font.render(str(row[1:]), True, (0,0,255)), (20, 50 + i*50))
                 status = "log:1"
             case "log:1":
                 for event in event_list:
