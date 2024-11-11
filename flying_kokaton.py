@@ -18,7 +18,7 @@ WIDTH = 450
 RAD =25#こうかとんボールの半径
 BALL_X=75#ボールのⅹ距離
 BALL_Y=75
-TIMES  = 1000
+TIMES  = 480
 
 # 関数宣言部
 def elise(ball_lst: list,judge: list)-> list:
@@ -304,7 +304,7 @@ class Score:
         self.color = (0, 0, 255)
         self.image = self.font.render(f"Score: {self.value}", 0, self.color)
         self.rect = self.image.get_rect()
-        self.rect.center = 100, 100
+        self.rect.center = 75, 25
 
     def update(self, screen: pg.Surface):
         """
@@ -355,7 +355,7 @@ class Time_circulate():
         if self.mode==0:
             txt = self.font.render(f"Operatinon time is 7second",True,(0,0,0))
         else:
-            txt = self.font.render(f"Operatinon limit {7-(tmr-self.past_time)//150}second",True,(0,0,0))
+            txt = self.font.render(f"Operatinon limit {7-(tmr-self.past_time)//60}second",True,(0,0,0))
         screen.blit(txt,[0,100])
 # クラス宣言部
 class PuzzleList():
@@ -429,6 +429,8 @@ class Combo:
     """
     
     combo_all = 0
+    score:Score
+    screen:pg.surface
 
     def __init__(self, lis:list[list]):
         self.combo_count = 0
@@ -770,16 +772,69 @@ class Combo:
         self.lis = lis
     
     @classmethod
-    def combo_add(self):
-        Combo.combo_all += 1
-        
+    def combo_add(cls):
+        import time
+        cls.combo_all += 1
+        cls.score.calculate_combo_score(cls.combo_all)
+        cls.uppdate_screen()
+        time.sleep(0.5)
+
     @classmethod
-    def get_combo(self):
-        return Combo.combo_all
+    def get_combo(cls):
+        return cls.combo_all
     
     @classmethod
-    def reset(self):
-        Combo.combo_all = 0
+    def reset(cls):
+        cls.combo_all = 0
+
+    @classmethod
+    def uppdate_screen(cls):
+        """
+        スクリーン情報を更新する
+        担当: C0A23019
+        """
+        cls.score.update(cls.screen)
+        # cls.combo.update(cls.screen)
+
+    @classmethod
+    def set_score(cls, score:Score):
+        """
+        scoreをセットする
+        担当: C0A23019
+
+        :param Score score: スコアクラス
+        """
+        cls.score = score
+    
+    @classmethod
+    def set_screen(cls, screen:pg.surface):
+        """
+        screenをセットする
+        担当: C0A23019
+
+        :param pg.surface screen: スクリーン情報
+        """
+        cls.screen = screen
+
+class ComboLog:
+    def __init__(self) -> None:
+        self.combo = 0
+        # 表示系
+        self.font = pg.font.Font(None, 50)
+        self.color = (0, 0, 255)
+        self.image = self.font.render(f"Now Combo: {self.combo}", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = 127, 55
+    
+    def add_combo(self, combo:int):
+        self.combo += combo
+    
+    def reset_combo(self):
+        self.combo = 0
+
+    def update(self, screen: pg.Surface):
+        self.image = self.font.render(f"Now Combo: {self.combo}", 0, self.color)
+        screen.blit(self.image, self.rect)
 
 
 # main関数
@@ -803,6 +858,10 @@ def main():
     kk_rct.center = 300,200
     # ここまで
     score_log_DAO = ScoreLogDAO()
+    score = Score(score_log_DAO)
+    Combo.set_score(score)
+    Combo.set_screen(screen)
+    show_combo = ComboLog()
     drop_list_x = 0
     drop_list_y = 0
     change_list_X = 0
@@ -859,8 +918,7 @@ def main():
                         ball.add(KoukatonDrop(lis,(i,j)))
                 status="game:1"
 
-            case "game:1":     
-                # 練習7
+            case "game:1":                    
                 for i in range(4):
                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                   
@@ -880,9 +938,13 @@ def main():
                     ball.draw(screen)
                 screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
                 tmrs.set_mode(0)
-                tmrs.update(tmr,screen)       
+                tmrs.update(tmr,screen)    
+                score.update(screen)
+                show_combo.update(screen)
+
             case "game:2":
                 tmrs.set_mode(1)
+                show_combo.reset_combo() 
                 for event in event_list:
                     if event.type == pg.QUIT: return
                     elif event.type == pg.KEYDOWN:
@@ -902,8 +964,9 @@ def main():
                                 check = check.get_lis()
                                 check = drop_down(check)
                                 status="game:1"
+                                show_combo.add_combo(Combo.get_combo())
                                 Combo.reset()
-                                lis.set_lis(check)
+                                lis_m.set_lis(check)
                 if tmr-tmrs.past_time>=TIMES:
                     while True:
                         check = Combo(lis)
@@ -914,6 +977,7 @@ def main():
                         check = check.get_lis()
                         check = drop_down(check)
                         status="game:1"
+                        show_combo.add_combo(Combo.get_combo())
                         Combo.reset()
                         lis_m.set_lis(check)
                         print(check)
@@ -927,6 +991,8 @@ def main():
                     ball.draw(screen)
                 screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
                 tmrs.update(tmr,screen)
+                score.update(screen)
+                show_combo.update(screen)
             
             case "log:0":
                 lis_log = score_log_DAO.get()
@@ -945,7 +1011,7 @@ def main():
         # 共通処理部
         pg.display.update()
         tmr += 1        
-        clock.tick(200)
+        clock.tick(60)
 
 if __name__ == "__main__":
     pg.init()
