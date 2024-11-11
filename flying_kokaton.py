@@ -3,6 +3,7 @@ import sys
 import pygame as pg
 import pygame
 from pygame.locals import *
+from module.audios.audio import Audio
 from module.name.name import Text, event_loop
 from module.scores.scores import Score, ScoreLogDAO
 from module.combos.combo import Combo
@@ -194,14 +195,30 @@ class ComboLog:
         self.image = self.font.render(f"Now Combo: {self.combo}", 0, self.color)
         screen.blit(self.image, self.rect)
 
+class NowLoding:
+    """
+    ロード画面に関わるクラス
+    """
+    def __init__(self, width:int, height:int) -> None:
+        self.font = pg.font.Font(None, 50)
+        self.color = (0, 0, 255)
+        self.image = self.font.render("Now Loding...", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = width//2, height//2
+
+    def update(self, screen: pg.Surface):
+        screen.blit(self.image, self.rect)
 
 # main関数
 def main(score_log_DAO:ScoreLogDAO, score:Score):
-    pg.display.set_caption("はばたけ！こうかとん")
+    pg.display.set_caption("パズル&こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
 
-    # 名前入力用のTextインスタンスを作成
+    # ローディング画面
+    now_loding = NowLoding(width=WIDTH, height=HEIGHT)
+    now_loding.update(screen)
+    pg.display.update()
 
     # 背景画像の読み込み
     bg_img = pg.image.load("./ex5/fig/pg_bg.jpg")
@@ -222,7 +239,6 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
     drop_list_y = 0
     change_list_X = 0
     change_list_Y = 0
-    text = Text()
     tmr = 0 # 時間保存
     tmrs=Time_circulate(tmr)
     lis_m = PuzzleList()
@@ -230,6 +246,8 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
     
     ball = pg.sprite.Group()
 
+    audio: Audio = Audio()
+    text:Text
     player_name = None
 
     """
@@ -255,7 +273,9 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
             case "home:0":
                 pg.key.start_text_input()  # テキスト入力を開始
                 font = pg.font.SysFont("yumincho", 30)
-                text = Text()  # Text クラスをインスタンス化
+                text = Text(audio)  # Text クラスをインスタンス化
+                audio.bgm_play()
+                audio.open_window_play()
                 status = "home:1"
             case "home:1":
                 player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
@@ -277,6 +297,7 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
 
                 score.set_player_name(player_name)
                 status="game:1"
+                audio.open_window_play()
 
             case "game:1":                    
                 for i in range(4):
@@ -313,6 +334,7 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
                         if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
                             lis[change_list_X][change_list_Y],lis[drop_list_x][drop_list_y] = lis[drop_list_x][drop_list_y],lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
                             drop_list_x,drop_list_y = change_list_X,change_list_Y
+                            audio.cursor_control_play()
                             print(lis)
                         if event.key == pg.K_RETURN: # ENTERが押されたとき
                             status = "game:3"
