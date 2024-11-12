@@ -105,6 +105,14 @@ class Score:
         self.rect = self.image.get_rect()
         self.rect.center = 75, 25
 
+    def set_player_name(self, player_name:str):
+        """
+        プレイヤー名を設定する
+
+        :param str player_name: プレイヤー名
+        """
+        self.player_name = player_name
+        
     def update(self, screen: pg.Surface):
         """
         スコア表示
@@ -136,5 +144,8 @@ class Score:
     def save(self) -> None:
         """
         スコアをファイルに保存する
+        ただし、guestの0scoreは保存しない
         """
+        if self.player_name == "guest" and self.value <= 0:
+            return
         self.session.insert(self.player_uuid, self.player_name, self.value)

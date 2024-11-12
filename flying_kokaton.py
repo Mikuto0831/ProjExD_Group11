@@ -3,6 +3,7 @@ import sys
 import pygame as pg
 import pygame
 from pygame.locals import *
+from module.audios.audio import Audio
 from module.name.name import Text, event_loop
 from module.scores.scores import Score, ScoreLogDAO
 from module.combos.combo import Combo
@@ -194,14 +195,30 @@ class ComboLog:
         self.image = self.font.render(f"Now Combo: {self.combo}", 0, self.color)
         screen.blit(self.image, self.rect)
 
+class NowLoding:
+    """
+    ロード画面に関わるクラス
+    """
+    def __init__(self, width:int, height:int) -> None:
+        self.font = pg.font.Font(None, 50)
+        self.color = (0, 0, 255)
+        self.image = self.font.render("Now Loding...", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = width//2, height//2
+
+    def update(self, screen: pg.Surface):
+        screen.blit(self.image, self.rect)
 
 # main関数
-def main():
-    pg.display.set_caption("はばたけ！こうかとん")
+def main(score_log_DAO:ScoreLogDAO, score:Score):
+    pg.display.set_caption("パズル&こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
 
-    # 名前入力用のTextインスタンスを作成
+    # ローディング画面
+    now_loding = NowLoding(width=WIDTH, height=HEIGHT)
+    now_loding.update(screen)
+    pg.display.update()
 
     # 背景画像の読み込み
     bg_img = pg.image.load("./ex5/fig/pg_bg.jpg")
@@ -215,22 +232,26 @@ def main():
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300,200
     # ここまで
-    score_log_DAO = ScoreLogDAO()
-    score = Score(score_log_DAO)
-    Combo.set_score(score)
-    Combo.set_screen(screen)
-    show_combo = ComboLog()
     drop_list_x = 0
     drop_list_y = 0
     change_list_X = 0
     change_list_Y = 0
-    text = Text()
     tmr = 0 # 時間保存
     tmrs=Time_circulate(tmr)
     lis_m = PuzzleList()
     lis = lis_m.get_lis()
     
     ball = pg.sprite.Group()
+
+    audio: Audio = Audio()
+    
+    Combo.set_score(score)
+    Combo.set_screen(screen)
+    Combo.set_audio(audio)
+    show_combo = ComboLog()
+
+    text:Text
+    player_name = None
 
     """
     status変数について
@@ -255,8 +276,10 @@ def main():
             case "home:0":
                 pg.key.start_text_input()  # テキスト入力を開始
                 font = pg.font.SysFont("yumincho", 30)
-                text = Text()  # Text クラスをインスタンス化
-                status = "log:0"
+                text = Text(audio)  # Text クラスをインスタンス化
+                audio.bgm_play()
+                audio.open_window_play()
+                status = "home:1"
             case "home:1":
                 player_name = event_loop(screen, text, font)  # 名前入力後、イベントループから取得
                 print(f"Player Name: {player_name}")
@@ -274,13 +297,16 @@ def main():
                 for i in range(len(lis)):
                     for j in range(len(lis[i])):
                         ball.add(KoukatonDrop(lis,(i,j)))
+
+                score.set_player_name(player_name)
                 status="game:1"
+                audio.open_window_play()
 
             case "game:1":                    
                 for i in range(4):
                     screen.blit(bg_imgs[i%2], [-(tmr % 3200)+1600*i, 0])
                   
-                key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
+                # key_lst = pg.key.get_pressed() # 練習8-3 全キーの押下状態取得
                 
                 for event in event_list:
                     if event.type == pg.QUIT: return
@@ -311,6 +337,7 @@ def main():
                         if (change_list_X,change_list_Y) != (drop_list_x,drop_list_y): # X,Yとx,yの値が一致していないとき
                             lis[change_list_X][change_list_Y],lis[drop_list_x][drop_list_y] = lis[drop_list_x][drop_list_y],lis[change_list_X][change_list_Y] # PuzzleListクラスのlisの中身を入れ替える
                             drop_list_x,drop_list_y = change_list_X,change_list_Y
+                            audio.cursor_control_play()
                             print(lis)
                         if event.key == pg.K_RETURN: # ENTERが押されたとき
                             status = "game:3"
@@ -334,6 +361,7 @@ def main():
                 check = Combo(lis)
                 co = check.get_count()
                 if co <= 0:
+                    Combo.reset_audio_combo()
                     status="game:1"
                 check = check.get_lis()
                 check = drop_down(check)
@@ -346,6 +374,7 @@ def main():
                 score.update(screen)
                 show_combo.update(screen)
                 
+
             
             case "log:0":
                 lis_log = score_log_DAO.get()
@@ -355,21 +384,27 @@ def main():
                 rnk_rct.center = 200, 200
 
                 font1 = pygame.font.SysFont("hg正楷書体pro", 35)
-                text1 = font1.render("！スコアランキング！", True, (255,0,255))
-                screen.blit(text1, (50,70))
+                text1 = font1.render("スコアランキング", True, (0,0,255))
+                screen.blit(text1, (100,70))
 
-                screen.blit(rnk_img, rnk_rct)
-                font = pygame.font.Font(None, 20)
-                sor = sorted(lis_log, reverse=True, key=lambda x: x[3])
+                font2 = pygame.font.SysFont("hg正楷書体pro", 25)
+                text2 = font2.render("ESCを押してスタート画面へ", True, (255,0,255))
+                screen.blit(text2, (60,500))
+
+                name_font = pygame.font.Font(None, 60)
+                point_font = pygame.font.Font(None, 40)
+                date_font = pygame.font.Font(None, 30)
+                sor = sorted(lis, reverse=True, key=lambda x: x[3])
+
                 # スコア表示
                 for i, row in enumerate(sor):
                     screen.blit(font.render(str(row[1:]), True, (0,0,255)), (20, 50 + i*50))
                 status = "log:1"
             case "log:1":
                 for event in event_list:
-                    if event.key == pg.K_ESCAPE:
+                    if event.type == pg.KEYDOWN:
                         status = "home:0"
-
+        
         # 共通処理部
         pg.display.update()
         tmr += 1        
@@ -377,6 +412,11 @@ def main():
 
 if __name__ == "__main__":
     pg.init()
-    main()
+    score_log_DAO = ScoreLogDAO()
+    score = Score(score_log_DAO)
+    try:
+        main(score_log_DAO, score)
+    finally:
+        score.save()
     pg.quit()
     sys.exit()
