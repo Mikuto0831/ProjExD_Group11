@@ -377,7 +377,7 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
 
             
             case "log:0":
-                lis = score_log_DAO.get()
+                log_lis = score_log_DAO.get()
                 bg_img = pg.image.load("./ex5/fig/654390.jpg")
                 bg_rct = bg_img.get_rect()
                 screen.blit(bg_img, bg_rct)
@@ -405,10 +405,10 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
                 screen.blit(rnk1_img, rnk1_rct)
                 screen.blit(rnk2_img, rnk2_rct)
                 screen.blit(rnk3_img, rnk3_rct)
-                name_font = pygame.font.Font(None, 60)
+                name_font = pygame.font.SysFont("hg正楷書体pro", 40)
                 point_font = pygame.font.Font(None, 40)
                 date_font = pygame.font.Font(None, 30)
-                sor = sorted(lis, reverse=True, key=lambda x: x[2])
+                sor = sorted(log_lis, reverse=True, key=lambda x: x[2])
                 status = "log:1"
             case "log:1":
                 # スコア表示
