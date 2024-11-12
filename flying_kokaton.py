@@ -939,6 +939,7 @@ def main():
                 name_font = pygame.font.Font(None, 60)
                 point_font = pygame.font.Font(None, 40)
                 date_font = pygame.font.Font(None, 30)
+    
                 sor = sorted(lis, reverse=True, key=lambda x: x[3])
                 # スコア表示
                 for i, row in enumerate(sor):
