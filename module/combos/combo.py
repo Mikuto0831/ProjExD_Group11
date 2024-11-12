@@ -201,7 +201,6 @@ class Combo:
                     self.combo_add()
                     self.change(self.lis, i, j, 22, self.lis[i][j])
                     break
-        
     def i_combo(self):
         """
         I型のコンボの判定
@@ -233,7 +232,7 @@ class Combo:
                     self.combo_add()
                     self.change(self.lis, i, j, 41, self.lis[i][j])
                     break
-    
+                
     def t_combo_rev(self):
         """
         Ｔ型(逆転)のコンボの判定
@@ -544,6 +543,8 @@ class Combo:
                 if lis[i][j] >= 10:
                     lis[i][j] = 0
         self.lis = lis
+    
+    
     
     @classmethod
     def combo_add(cls):

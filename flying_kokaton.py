@@ -365,20 +365,27 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
 
             case "game:3":
                 check = Combo(lis)
+                check.combo_check()
                 co = check.get_count()
+                print(check.get_lis())
                 if co <= 0:
                     Combo.reset_audio_combo()
-                    status="game:1"
-                check = check.get_lis()
-                check = drop_down(check)
-                show_combo.add_combo(Combo.get_combo())
-                Combo.reset()
-                lis_m.set_lis(check)
-                print(check)
+                    status="game:4"
                 screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
                 tmrs.update(tmr,screen)
                 score.update(screen)
                 show_combo.update(screen)
+            
+            case "game:4":
+                check = check.get_lis()
+                check = drop_down(check)
+                show_combo.add_combo(Combo.get_combo())
+                lis_m.set_lis(check)
+                print(check)
+                tmrs.update(tmr,screen)
+                score.update(screen)
+                show_combo.update(screen)
+                
                 
 
             
