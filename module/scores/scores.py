@@ -112,7 +112,7 @@ class Score:
         :param str player_name: プレイヤー名
         """
         self.player_name = player_name
-
+        
     def update(self, screen: pg.Surface):
         """
         スコア表示
