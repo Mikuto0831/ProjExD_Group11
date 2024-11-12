@@ -4,16 +4,19 @@ import sys
 from typing import List
 import pygame as pg
 
+from module.audios.audio import Audio
+
 class Text:
     """
     PygameのINPUT、EDITINGイベントで使うクラス
     カーソル操作や文字列処理に使う
     """
-    def __init__(self) -> None:
+    def __init__(self, audio: Audio) -> None:
         self.text = ["|"]  # 入力されたテキストを格納していく変数
         self.editing: List[str] = []  # 全角の文字編集中(変換前)の文字を格納するための変数
         self.is_editing = False  # 編集中文字列の有無(全角入力時に使用)
         self.cursor_pos = 0  # 文字入力のカーソル(パイプ|)の位置
+        self.audio = audio
 
     def __str__(self) -> str:
         """self.textリストを文字列にして返す"""
@@ -112,17 +115,21 @@ def event_loop(screen, text, font):
                     text.move_cursor_right()
                 elif event.key == pg.K_ESCAPE:
                     return str()
+                text.audio.key_push_play()
 
             elif event.type == pg.TEXTEDITING:
                 # 編集中のテキストとカーソル位置を取得
                 editing_text = event.text
                 editing_cursor_pos = event.start
                 displayed_text = text.edit(editing_text, editing_cursor_pos)
+                text.audio.key_push_play()
+
 
             elif event.type == pg.TEXTINPUT:
                 # 確定したテキストを追加
                 text.input(event.text)
                 editing_text = ""  # 確定後は変換中のテキストをリセット
+                text.audio.key_push_play()
 
         # 現在の入力文字列を描画（変換中のテキストも含む）
         if editing_text:
