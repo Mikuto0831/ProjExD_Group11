@@ -16,7 +16,7 @@ WIDTH = 450
 RAD =25#こうかとんボールの半径
 BALL_X=75#ボールのⅹ距離
 BALL_Y=75
-TIMES  = 480
+TIMES  = 600
 
 # 関数宣言部
 def elise(ball_lst: list,judge: list)-> list:
@@ -106,9 +106,9 @@ class Time_circulate():
         self.past_time=past_time
     def update(self,tmr,screen):
         if self.mode==0:
-            txt = self.font.render(f"Operatinon time is 7second",True,(0,0,0))
+            txt = self.font.render(f"Operatinon time is 10second",True,(0,0,0))
         else:
-            txt = self.font.render(f"Operatinon limit {7-(tmr-self.past_time)//61}econd",True,(0,0,0))
+            txt = self.font.render(f"Operatinon limit {10-(tmr-self.past_time)//60}second",True,(0,0,0))
         screen.blit(txt,[0,100])
 
 class PuzzleList():
