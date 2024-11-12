@@ -15,11 +15,12 @@ class Audio:
             self.key_push = pygame.mixer.Sound('./ex5/audio/key_push.mp3')
 
             self.combos = [pygame.mixer.Sound(f'./ex5/audio/combo/{i}.mp3') for i in range(1, 16)]
+
             self.combo_count = 0
 
             # BGM
             self.bgm = pygame.mixer.Sound('./ex5/audio/パズドラ風.mp3')
-            self.bgm.set_volume(0.03)
+            self.bgm.set_volume(0.05)
             self.play_flag = True
         except FileNotFoundError:
             print("Error: No such file or directory")
