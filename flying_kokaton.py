@@ -19,18 +19,15 @@ BALL_Y=75
 TIMES  = 480
 
 # 関数宣言部
-def elise(ball_lst: list,judge: list)-> list:
-    """
-    引数:ball_lst　ボールの色やなしを保持するリスト
-    引数:judge判定された
-    コンボ判定されたball_lstを0にする
-    judge =[[0,1],[0,2]]etc
-    """
-    for i in judge:
-        ball_lst[i[0]][i[1]] =0
-    return ball_lst
 
 def drop_down(lis:list[list])->list[list]:
+    """
+    ドロップを生成して上から落とし、盤面を埋める
+    引数:
+    list[list]
+    返り値:
+    list[list]
+    """
     check = True
     while check:
         for j in range(6):
@@ -49,6 +46,8 @@ def drop_down(lis:list[list])->list[list]:
         if all(jadge):
             check = False
     return lis
+
+
 
 
 
@@ -116,7 +115,7 @@ class PuzzleList():
     パズル画面を管理するリストに関係するクラス
     担当:瀬尾
     get_lis():生成した盤面を取得する
-    selt_lis(list[list]):盤面をlist[list]に置き換える
+    set_lis(list[list]):盤面をlist[list]に置き換える
     """
 
     def __init__(self):
@@ -128,16 +127,23 @@ class PuzzleList():
         self.lis=self.puzzle_generate(6,6)
     
     def get_lis(self):
+        """
+        リストを返す
+        """
         return self.lis
     
     def set_lis(self, lis:list[list]):
+        """
+        リストを設定する
+        引数:list[list]
+        """
         self.lis = lis
 
     def move_lect(pos:list, key)-> int:
         """
         引数1: 現在の位置 (x, y) または (X, Y) を含むリスト
         引数2: イベントキー（pg.K_UP, pg.K_DOWN, pg.K_LEFT, pg.K_RIGHT）
-        返り値：int型のxとy
+        返り値:int型のxとy
         """
         y, x = pos # xとyを引数posとする
         if key == pg.K_UP and y > 0: # 上矢印キーが押されたときかつyがフレーム内
@@ -359,20 +365,27 @@ def main(score_log_DAO:ScoreLogDAO, score:Score):
 
             case "game:3":
                 check = Combo(lis)
+                check.combo_check()
                 co = check.get_count()
+                print(check.get_lis())
                 if co <= 0:
                     Combo.reset_audio_combo()
-                    status="game:1"
-                check = check.get_lis()
-                check = drop_down(check)
-                show_combo.add_combo(Combo.get_combo())
-                Combo.reset()
-                lis_m.set_lis(check)
-                print(check)
+                    status="game:4"
                 screen.blit(ball_img,[drop_list_y*75+12,drop_list_x*75+215])
                 tmrs.update(tmr,screen)
                 score.update(screen)
                 show_combo.update(screen)
+            
+            case "game:4":
+                check = check.get_lis()
+                check = drop_down(check)
+                show_combo.add_combo(Combo.get_combo())
+                lis_m.set_lis(check)
+                print(check)
+                tmrs.update(tmr,screen)
+                score.update(screen)
+                show_combo.update(screen)
+                
                 
 
             

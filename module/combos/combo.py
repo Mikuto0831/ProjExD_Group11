@@ -3,12 +3,24 @@ from module.scores.scores import Score
 from module.audios.audio import Audio
 
 def jadge_combo(a, b):
+    """
+    aとbが同じ属性か判断する
+    """
     if a == b or a + 10 == b or a == b + 10:
         return True
     else:
         return False
 
 def jadge_double(lis:list[list], i:int, j:int, combo_type:int, combo_len:int = 3):
+    """
+    コンボが成立しているか判定する
+    引数:
+    list[list]:盤面のリスト,
+    int:Y座標,
+    int:X座標,
+    int:コンボタイプ,
+    int:コンボに使われるドロップ数 初期値３
+    """
     T = combo_len
     if combo_type == 1:
         for n in range(3):
@@ -128,6 +140,10 @@ class Combo:
     screen:pg.surface
 
     def __init__(self, lis:list[list]):
+        """
+        コンボの判定を行う
+        引数:list[list] 盤面の配列
+        """
         self.combo_count = 0
         self.lis = lis
         check = 0
@@ -150,10 +166,14 @@ class Combo:
                 break
             check = self.combo_count
         print("rep")
-        print(self.lis[0], "\n", self.lis[1], "\n", self.lis[2], "\n", self.lis[3], "\n", self.lis[4], "\n", self.lis[5])
+        print(self.lis[0], "\n", self.lis[1], "\n", self.lis[2], "\n", self.lis[3], "\n", self.lis[4], "\n", self.lis[5], "\n")
         self.elise(self.lis)
     
     def box_combo(self):
+        """
+        箱型(3×3)のコンボの判定
+        コンボタイプ:1
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -167,6 +187,9 @@ class Combo:
                     break
 
     def h_combo(self):
+        """
+        H型のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -178,8 +201,10 @@ class Combo:
                     self.combo_add()
                     self.change(self.lis, i, j, 22, self.lis[i][j])
                     break
-        
     def i_combo(self):
+        """
+        I型のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -193,6 +218,9 @@ class Combo:
                     break
 
     def t_combo(self):
+        """
+        Ｔ型のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -204,8 +232,11 @@ class Combo:
                     self.combo_add()
                     self.change(self.lis, i, j, 41, self.lis[i][j])
                     break
-    
+                
     def t_combo_rev(self):
+        """
+        Ｔ型(逆転)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -219,6 +250,9 @@ class Combo:
                     break
 
     def t_left_combo(self):
+        """
+        Ｔ型(左倒し)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -232,6 +266,9 @@ class Combo:
                     break
     
     def t_right_combo(self):
+        """
+        T型(右倒し)のコンボの判定
+        """
         for i in range(1, len(self.lis) - 1):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -245,6 +282,9 @@ class Combo:
                     break
     
     def l_combo_dl(self):
+        """
+        Ｌ字型(四角の左下)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -258,6 +298,9 @@ class Combo:
                     break
 
     def l_combo_dr(self):
+        """
+        Ｌ字型(四角の右下)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(2, len(self.lis)):
@@ -269,7 +312,11 @@ class Combo:
                     self.combo_add()
                     self.change(self.lis, i, j, 32, self.lis[i][j])
                     break
+
     def l_combo_ul(self):
+        """
+        L字型(四角の左上)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -281,7 +328,11 @@ class Combo:
                     self.combo_add()
                     self.change(self.lis, i, j, 31, self.lis[i][j])
                     break
+
     def l_combo_ur(self):
+        """
+        L字型(四角の右上)のコンボの判定
+        """
         for i in range(len(self.lis) - 2):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -295,6 +346,9 @@ class Combo:
                     break
     
     def cross_combo(self):
+        """
+        十字型(3×3)のコンボの判定
+        """
         for i in range(1, len(self.lis) - 1):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -309,6 +363,9 @@ class Combo:
                     break
 
     def row_combo(self):
+       """
+       横一列のコンボの判定
+       """
        for i in range(len(self.lis)):
             stack = 0
             for j in range(len(self.lis) - 2):
@@ -332,6 +389,9 @@ class Combo:
                         break
                     
     def column_combo(self):
+        """
+        縦一列のコンボの判定
+        """
         for j in range(len(self.lis)):
             stack = 0
             for i in range(len(self.lis) - 2):
@@ -352,18 +412,31 @@ class Combo:
                         print("column", [i, j], combo_len)
                         self.combo_add()
                         self.change(self.lis, i, j, 12, self.lis[i][j], combo_len)
-                        
                         break
 
     def get_count(self):
+        """
+        コンボ数を返す
+        """
         return self.combo_count
     
     def get_lis(self):
+        """
+        リストを返す
+        """
         return self.lis
     
     def change(self, lis:list[list], i:int, j:int, combo_type:int, ele:int = 0, combo_len:int = 1):
-        #引数:lst　ボールの種類を保持するリスト
-        #コンボ判定されたball_lstを0にする
+        """
+        コンボに使われた配列の数字に10を足す
+        引数:
+        lis:盤面に使う配列,
+        i:Y座標,
+        j:X座標,
+        combo_type:コンボの種類     1:box 11:row 12:column 21:cross 22:H 23:I 31:L-dl 32:L-dr 33:L-ul 34:L-ur 41:T 42:T-rev 43:T-l 44:T-r,
+        ele:コンボしたドロップの属性,
+        combo_len:コンボに使われたドロップの数 初期値1
+        """
         if ele >= 10:
             ele = ele - 10
         
@@ -460,14 +533,25 @@ class Combo:
 
     
     def elise(self, lis:list[list]):
+        """
+        一度以上コンボに使われたマスの数字を0にする(10以上の数を0にする)
+        引数:
+        lis:盤面のリスト
+        """
         for i in range(len(lis)):
             for j in range(len(lis[i])):
                 if lis[i][j] >= 10:
                     lis[i][j] = 0
         self.lis = lis
     
+    
+    
     @classmethod
     def combo_add(cls):
+        """
+        クラスメソッド
+        コンボ数を1増やす
+        """
         import time
         cls.combo_all += 1
         cls.score.calculate_combo_score(cls.combo_all)
@@ -477,10 +561,18 @@ class Combo:
 
     @classmethod
     def get_combo(cls):
+        """
+        クラスメソッド
+        コンボ数を取得する
+        """
         return cls.combo_all
     
     @classmethod
     def reset(cls):
+        """
+        クラスメソッド
+        コンボ数を0にする
+        """
         cls.combo_all = 0
 
     @classmethod
